@@ -1,0 +1,10 @@
+{
+  "server": {
+    "archive": "synloquent-laravel-0.1.0-6c944b64a6936a7b.zip",
+    "sha256": "6c944b64a6936a7b5fb3629a718a9f60fb325c74ee9bfd79eeb597e056604629"
+  },
+  "client": {
+    "archive": "synloquent-client-0.1.0-eaa8a74731c5329a.tgz",
+    "sha256": "eaa8a74731c5329a3d65665d6308e449df8dbf21b2358845e32e2979c32cd4ff"
+  }
+}

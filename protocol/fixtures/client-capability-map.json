@@ -1,0 +1,1966 @@
+{
+  "version": 1,
+  "methods": {
+    "C26.transaction": {
+      "publicApi": "client.transaction and supplied scoped client.transaction",
+      "limits": "Explicit exported schema, owned SQLite transactions and partitioned durable state.",
+      "local": {
+        "source": "packages/client/tests/core.test.ts",
+        "testcase": "C26 atomic rollback and nested savepoint preserve data/outbox and publish after commit",
+        "report": "client"
+      }
+    },
+    "C26.rollback": {
+      "publicApi": "client.transaction and supplied scoped client.transaction",
+      "limits": "Explicit exported schema, owned SQLite transactions and partitioned durable state.",
+      "local": {
+        "source": "packages/client/tests/core.test.ts",
+        "testcase": "C26 atomic rollback and nested savepoint preserve data/outbox and publish after commit",
+        "report": "client"
+      }
+    },
+    "C26.savepoint": {
+      "publicApi": "client.transaction and supplied scoped client.transaction",
+      "limits": "Explicit exported schema, owned SQLite transactions and partitioned durable state.",
+      "local": {
+        "source": "packages/client/tests/core.test.ts",
+        "testcase": "C26 atomic rollback and nested savepoint preserve data/outbox and publish after commit",
+        "report": "client"
+      }
+    },
+    "C26.nestedRollback": {
+      "publicApi": "client.transaction and supplied scoped client.transaction",
+      "limits": "Explicit exported schema, owned SQLite transactions and partitioned durable state.",
+      "local": {
+        "source": "packages/client/tests/core.test.ts",
+        "testcase": "C26 atomic rollback and nested savepoint preserve data/outbox and publish after commit",
+        "report": "client"
+      }
+    },
+    "C16.partialCompletenessGuard": {
+      "publicApi": "Query.count/exists/allowPartial/aggregateResult and Collection.completeness",
+      "limits": "Scalar completeness rejects unknown/partial membership unless explicitly opted in.",
+      "local": {
+        "source": "packages/client/tests/query-conformance.test.ts",
+        "testcase": "C16 C52 partial scalar results require opt-in, metadata survives collection transforms and decimals stay exact",
+        "report": "client"
+      }
+    },
+    "C52.partialDataset": {
+      "publicApi": "Query.count/exists/allowPartial/aggregateResult and Collection.completeness",
+      "limits": "Scalar completeness rejects unknown/partial membership unless explicitly opted in.",
+      "local": {
+        "source": "packages/client/tests/query-conformance.test.ts",
+        "testcase": "C16 C52 partial scalar results require opt-in, metadata survives collection transforms and decimals stay exact",
+        "report": "client"
+      }
+    },
+    "C19.iterationIsolation": {
+      "publicApi": "Query.chunkById",
+      "limits": "Each page reads committed data. This assertion deletes a row between actual pages.",
+      "local": {
+        "source": "packages/client/tests/query-conformance.test.ts",
+        "testcase": "C19 chunkById and lazyById keep keyset position across deletion between chunks",
+        "report": "client"
+      }
+    },
+    "C23.uniquenessConflict": {
+      "publicApi": "Query.insert and exported UNIQUE constraint",
+      "limits": "SQLite uniqueness fails atomically. Concurrent remote uniqueness remains server authoritative.",
+      "local": {
+        "source": "packages/client/tests/durability.test.ts",
+        "testcase": "C23 C24 firstOrNew/firstOrCreate/updateOrCreate and atomic unique upsert/bulk mutation retain durable event mode",
+        "report": "client"
+      }
+    },
+    "C45.map": {
+      "publicApi": "Collection.map/filter/reject/pluck/keyBy/groupBy/sort/unique/chunk",
+      "limits": "In-memory transforms do not perform I/O or mutate the source.",
+      "local": {
+        "source": "packages/client/tests/core.test.ts",
+        "testcase": "C44 soft-delete restore and C45 collection methods retain expected meaning",
+        "report": "client"
+      }
+    },
+    "C45.filter": {
+      "publicApi": "Collection.map/filter/reject/pluck/keyBy/groupBy/sort/unique/chunk",
+      "limits": "In-memory transforms do not perform I/O or mutate the source.",
+      "local": {
+        "source": "packages/client/tests/core.test.ts",
+        "testcase": "C44 soft-delete restore and C45 collection methods retain expected meaning",
+        "report": "client"
+      }
+    },
+    "C45.reject": {
+      "publicApi": "Collection.map/filter/reject/pluck/keyBy/groupBy/sort/unique/chunk",
+      "limits": "In-memory transforms do not perform I/O or mutate the source.",
+      "local": {
+        "source": "packages/client/tests/core.test.ts",
+        "testcase": "C44 soft-delete restore and C45 collection methods retain expected meaning",
+        "report": "client"
+      }
+    },
+    "C45.pluck": {
+      "publicApi": "Collection.map/filter/reject/pluck/keyBy/groupBy/sort/unique/chunk",
+      "limits": "In-memory transforms do not perform I/O or mutate the source.",
+      "local": {
+        "source": "packages/client/tests/core.test.ts",
+        "testcase": "C44 soft-delete restore and C45 collection methods retain expected meaning",
+        "report": "client"
+      }
+    },
+    "C45.keyBy": {
+      "publicApi": "Collection.map/filter/reject/pluck/keyBy/groupBy/sort/unique/chunk",
+      "limits": "In-memory transforms do not perform I/O or mutate the source.",
+      "local": {
+        "source": "packages/client/tests/core.test.ts",
+        "testcase": "C44 soft-delete restore and C45 collection methods retain expected meaning",
+        "report": "client"
+      }
+    },
+    "C45.groupBy": {
+      "publicApi": "Collection.map/filter/reject/pluck/keyBy/groupBy/sort/unique/chunk",
+      "limits": "In-memory transforms do not perform I/O or mutate the source.",
+      "local": {
+        "source": "packages/client/tests/core.test.ts",
+        "testcase": "C44 soft-delete restore and C45 collection methods retain expected meaning",
+        "report": "client"
+      }
+    },
+    "C45.sort": {
+      "publicApi": "Collection.map/filter/reject/pluck/keyBy/groupBy/sort/unique/chunk",
+      "limits": "In-memory transforms do not perform I/O or mutate the source.",
+      "local": {
+        "source": "packages/client/tests/core.test.ts",
+        "testcase": "C44 soft-delete restore and C45 collection methods retain expected meaning",
+        "report": "client"
+      }
+    },
+    "C45.unique": {
+      "publicApi": "Collection.map/filter/reject/pluck/keyBy/groupBy/sort/unique/chunk",
+      "limits": "In-memory transforms do not perform I/O or mutate the source.",
+      "local": {
+        "source": "packages/client/tests/core.test.ts",
+        "testcase": "C44 soft-delete restore and C45 collection methods retain expected meaning",
+        "report": "client"
+      }
+    },
+    "C45.chunk": {
+      "publicApi": "Collection.map/filter/reject/pluck/keyBy/groupBy/sort/unique/chunk",
+      "limits": "In-memory transforms do not perform I/O or mutate the source.",
+      "local": {
+        "source": "packages/client/tests/core.test.ts",
+        "testcase": "C44 soft-delete restore and C45 collection methods retain expected meaning",
+        "report": "client"
+      }
+    },
+    "C42.sync": {
+      "publicApi": "Relation.sync",
+      "limits": "Requires complete canonical membership and matching expectedRelationRevision. Stale supplied revision fails before intent creation.",
+      "local": {
+        "source": "packages/client/tests/relations-conformance.test.ts",
+        "testcase": "C40-C42 bidirectional canonical membership replay keeps pending attach/detach/toggle and revision-bound sync",
+        "report": "client"
+      }
+    },
+    "C42.completeSetGuard": {
+      "publicApi": "Relation.sync",
+      "limits": "Requires complete canonical membership and matching expectedRelationRevision. Stale supplied revision fails before intent creation.",
+      "local": {
+        "source": "packages/client/tests/relations-conformance.test.ts",
+        "testcase": "C40-C42 bidirectional canonical membership replay keeps pending attach/detach/toggle and revision-bound sync",
+        "report": "client"
+      }
+    },
+    "C42.staleRevisionConflict": {
+      "publicApi": "Relation.sync",
+      "limits": "Requires complete canonical membership and matching expectedRelationRevision. Stale supplied revision fails before intent creation.",
+      "local": {
+        "source": "packages/client/tests/relations-conformance.test.ts",
+        "testcase": "C40-C42 bidirectional canonical membership replay keeps pending attach/detach/toggle and revision-bound sync",
+        "report": "client"
+      }
+    },
+    "C42.syncWithoutDetaching": {
+      "publicApi": "Relation.syncWithoutDetaching",
+      "limits": "Explicit additive membership preserves unrelated targets.",
+      "local": {
+        "source": "packages/client/tests/core.test.ts",
+        "testcase": "C28 C29 C30 C35-C43 offline parent-child and ordered pivots query through SQLite",
+        "report": "client"
+      }
+    },
+    "C51.querySubscription": {
+      "publicApi": "Query.observationKey, client.observe, QuerySubscription.refresh/getSnapshot/dispose and useSynloquentQuery",
+      "limits": "Core witness distinguishes actual local and remote observations and exact keys for mode, partial opt-in and schema. Actual mounted React mode and unmount are separately qualified on native.",
+      "local": {
+        "source": "packages/client/tests/state-boundaries.test.ts",
+        "testcase": "C51 observation keys retain remote mode and partial opt-in while actual subscriptions read the selected execution source",
+        "report": "client"
+      }
+    },
+    "C51.committedSnapshot": {
+      "publicApi": "client.observe, QuerySubscription.subscribe/getSnapshot/dispose",
+      "limits": "Publishes committed data. The test asserts stable snapshot identity and owner listener removal.",
+      "local": {
+        "source": "packages/client/tests/sync.test.ts",
+        "testcase": "C51 query subscriptions keep stable snapshots and dispose all listeners",
+        "report": "client"
+      }
+    },
+    "C51.cancelCleanup": {
+      "publicApi": "QuerySubscription.subscribe/unsubscribe with Query.withCount",
+      "limits": "Last unsubscribe detaches the owner listener. A subsequent subscription reactivates and observes committed related-row changes.",
+      "local": {
+        "source": "packages/client/tests/state-boundaries.test.ts",
+        "testcase": "C51 model aggregate subscription releases and reacquires owner listeners after last unsubscribe",
+        "report": "client"
+      }
+    },
+    "C53.draftDirty": {
+      "publicApi": "ModelBinding.new, Model.save, Model.syncState",
+      "limits": "Draft has no row. Save persists proposal/outbox atomically and restart restores pending state.",
+      "local": {
+        "source": "packages/client/tests/durability.test.ts",
+        "testcase": "C03 C04 C05 C53 draft fill/save/change history, defaults, replicate and timestamp touch persist separately from canonical",
+        "report": "client"
+      }
+    },
+    "C53.durableIntent": {
+      "publicApi": "ModelBinding.new, Model.save, Model.syncState",
+      "limits": "Draft has no row. Save persists proposal/outbox atomically and restart restores pending state.",
+      "local": {
+        "source": "packages/client/tests/durability.test.ts",
+        "testcase": "C03 C04 C05 C53 draft fill/save/change history, defaults, replicate and timestamp touch persist separately from canonical",
+        "report": "client"
+      }
+    },
+    "C53.pending": {
+      "publicApi": "ModelBinding.new, Model.save, Model.syncState",
+      "limits": "Draft has no row. Save persists proposal/outbox atomically and restart restores pending state.",
+      "local": {
+        "source": "packages/client/tests/durability.test.ts",
+        "testcase": "C03 C04 C05 C53 draft fill/save/change history, defaults, replicate and timestamp touch persist separately from canonical",
+        "report": "client"
+      }
+    },
+    "C53.synced": {
+      "publicApi": "SyncEngine.flush and immutable attempted Operation",
+      "limits": "Lost response is replayed with the same operation identity. Later edits form new causal intent.",
+      "local": {
+        "source": "packages/client/tests/sync.test.ts",
+        "testcase": "C01 C53 C57 lost response retries immutable intent and integer aliases atomically remap parent/child",
+        "report": "client"
+      }
+    },
+    "C57.retryUncertainty": {
+      "publicApi": "SyncEngine.flush and immutable attempted Operation",
+      "limits": "Lost response is replayed with the same operation identity. Later edits form new causal intent.",
+      "local": {
+        "source": "packages/client/tests/sync.test.ts",
+        "testcase": "C01 C53 C57 lost response retries immutable intent and integer aliases atomically remap parent/child",
+        "report": "client"
+      }
+    },
+    "C57.immutableAttempt": {
+      "publicApi": "SyncEngine.flush and immutable attempted Operation",
+      "limits": "Lost response is replayed with the same operation identity. Later edits form new causal intent.",
+      "local": {
+        "source": "packages/client/tests/sync.test.ts",
+        "testcase": "C01 C53 C57 lost response retries immutable intent and integer aliases atomically remap parent/child",
+        "report": "client"
+      }
+    },
+    "C53.conflicted": {
+      "publicApi": "Model.syncState and SyncEngine.resolveConflict(retry)",
+      "limits": "Canonical pull preserves proposal. Stale revision retains conflict, explicit retry obtains acceptance.",
+      "local": {
+        "source": "packages/client/tests/sync.test.ts",
+        "testcase": "C53 C57 canonical pulls preserve unacknowledged proposal and conflict resolution is explicit",
+        "report": "client"
+      }
+    },
+    "C57.retryConflict": {
+      "publicApi": "Model.syncState and SyncEngine.resolveConflict(retry)",
+      "limits": "Canonical pull preserves proposal. Stale revision retains conflict, explicit retry obtains acceptance.",
+      "local": {
+        "source": "packages/client/tests/sync.test.ts",
+        "testcase": "C53 C57 canonical pulls preserve unacknowledged proposal and conflict resolution is explicit",
+        "report": "client"
+      }
+    },
+    "C54.offlineBoot": {
+      "publicApi": "createSynloquent and SyncEngine.updateManifest",
+      "limits": "Compatible add-column backfill retains pending edits and cached schema across actual file reopen.",
+      "local": {
+        "source": "packages/client/tests/compatibility.test.ts",
+        "testcase": "C54 compatible online field backfill is atomic, retains pending edits and boots offline from cached manifest",
+        "report": "client"
+      }
+    },
+    "C54.compatibleOnlineManifest": {
+      "publicApi": "createSynloquent and SyncEngine.updateManifest",
+      "limits": "Compatible add-column backfill retains pending edits and cached schema across actual file reopen.",
+      "local": {
+        "source": "packages/client/tests/compatibility.test.ts",
+        "testcase": "C54 compatible online field backfill is atomic, retains pending edits and boots offline from cached manifest",
+        "report": "client"
+      }
+    },
+    "C54.cachedManifest": {
+      "publicApi": "createSynloquent and SyncEngine.updateManifest",
+      "limits": "Compatible add-column backfill retains pending edits and cached schema across actual file reopen.",
+      "local": {
+        "source": "packages/client/tests/compatibility.test.ts",
+        "testcase": "C54 compatible online field backfill is atomic, retains pending edits and boots offline from cached manifest",
+        "report": "client"
+      }
+    },
+    "C55.schemaBackfill": {
+      "publicApi": "createSynloquent and SyncEngine.updateManifest",
+      "limits": "Compatible add-column backfill retains pending edits and cached schema across actual file reopen.",
+      "local": {
+        "source": "packages/client/tests/compatibility.test.ts",
+        "testcase": "C54 compatible online field backfill is atomic, retains pending edits and boots offline from cached manifest",
+        "report": "client"
+      }
+    },
+    "C54.unknownCapabilityGuard": {
+      "publicApi": "createSynloquent/assertManifest and SyncEngine.updateManifest",
+      "limits": "Unknown required capabilities, unexported index fields and breaking decimal scale fail before activation.",
+      "local": {
+        "source": "packages/client/tests/compatibility.test.ts",
+        "testcase": "C54 unknown required engine capability, malformed indexes and breaking field changes fail closed",
+        "report": "client"
+      }
+    },
+    "C55.snapshot": {
+      "publicApi": "SyncEngine.installSnapshot",
+      "limits": "Content, identities, schema, scope and SQLite constraints are verified. Failure preserves previous data/cursor/generation.",
+      "local": {
+        "source": "packages/client/tests/snapshot.test.ts",
+        "testcase": "C55 snapshot failed constraints and duplicate identity roll back data, cursor and generation together",
+        "report": "client"
+      }
+    },
+    "C55.snapshotRollback": {
+      "publicApi": "SyncEngine.installSnapshot",
+      "limits": "Content, identities, schema, scope and SQLite constraints are verified. Failure preserves previous data/cursor/generation.",
+      "local": {
+        "source": "packages/client/tests/snapshot.test.ts",
+        "testcase": "C55 snapshot failed constraints and duplicate identity roll back data, cursor and generation together",
+        "report": "client"
+      }
+    },
+    "C55.pendingEditPreservation": {
+      "publicApi": "SyncEngine.installSnapshot/flush",
+      "limits": "Authoritative actor-partition aliases preserve one local entity and remap child identity across lost response, snapshot and replay.",
+      "local": {
+        "source": "packages/client/tests/recovery.test.ts",
+        "testcase": "C01 C55 C57 lost create response then authoritative-alias snapshot and immutable replay keep one stable parent and child",
+        "report": "client"
+      }
+    },
+    "C55.retentionResnapshot": {
+      "publicApi": "SyncEngine.pull and resnapshot",
+      "limits": "Expired retention cursor triggers explicit immutable snapshot installation.",
+      "local": {
+        "source": "packages/client/tests/snapshot.test.ts",
+        "testcase": "C55 retention expiry requests an immutable snapshot and resumes from its authoritative cursor",
+        "report": "client"
+      }
+    },
+    "C56.accountPartition": {
+      "publicApi": "client.setSession and SyncEngine.flush",
+      "limits": "Changing account rejects old cached models and a deliberately delayed push receipt. Returning recovers durable sending intent.",
+      "local": {
+        "source": "packages/client/tests/sync.test.ts",
+        "testcase": "C56 logout invalidates cached models and refuses a late push response",
+        "report": "client"
+      }
+    },
+    "C56.sessionGeneration": {
+      "publicApi": "client.setSession and SyncEngine.flush",
+      "limits": "Changing account rejects old cached models and a deliberately delayed push receipt. Returning recovers durable sending intent.",
+      "local": {
+        "source": "packages/client/tests/sync.test.ts",
+        "testcase": "C56 logout invalidates cached models and refuses a late push response",
+        "report": "client"
+      }
+    },
+    "C56.lateResponse": {
+      "publicApi": "client.setSession and SyncEngine.flush",
+      "limits": "Changing account rejects old cached models and a deliberately delayed push receipt. Returning recovers durable sending intent.",
+      "local": {
+        "source": "packages/client/tests/sync.test.ts",
+        "testcase": "C56 logout invalidates cached models and refuses a late push response",
+        "report": "client"
+      }
+    },
+    "C57.cancelUnattempted": {
+      "publicApi": "sync.cancel, Model.delete/forceDelete, sync.installSnapshot/pull and durable restart",
+      "limits": "Unattempted hard-delete cancellation rebuilds lifecycle and child proposals only for current confirmed membership. Cascade/nullify effects, recursive children and pivot membership restore across restart. Snapshot or pull revoke remains hidden. Actual causal dependent operations must be cancelled first.",
+      "local": {
+        "source": "packages/client/tests/delete-cancellation.test.ts",
+        "testcase": "C51 C52 C55 C57 C58 delete cancellation restores only confirmed membership across cascade nullify snapshot pull and restart",
+        "report": "client"
+      }
+    },
+    "C57.confirmedWrite": {
+      "publicApi": "ModelBinding.createConfirmed and SyncEngine.status",
+      "limits": "Fixture transport proves accepted status. Primary actual HTTP confirmed-write witness is supplied separately.",
+      "local": {
+        "source": "packages/client/tests/sync.test.ts",
+        "testcase": "C27 causal remote atomic group queues complete topologically ordered durable intent and C57 confirmed create",
+        "report": "client"
+      }
+    },
+    "C58.cascadeDelete": {
+      "publicApi": "Model.delete and reflected onDelete",
+      "limits": "Local restrict leaves database unchanged. Cascade hides related rows and pivot membership within the same owned transaction.",
+      "local": {
+        "source": "packages/client/tests/relations-conformance.test.ts",
+        "testcase": "C58 declared cascade/restrict and real deferred SQLite constraints preserve atomic deletion and alias remapping",
+        "report": "client"
+      }
+    },
+    "C58.restrictDelete": {
+      "publicApi": "Model.delete and reflected onDelete",
+      "limits": "Local restrict leaves database unchanged. Cascade hides related rows and pivot membership within the same owned transaction.",
+      "local": {
+        "source": "packages/client/tests/relations-conformance.test.ts",
+        "testcase": "C58 declared cascade/restrict and real deferred SQLite constraints preserve atomic deletion and alias remapping",
+        "report": "client"
+      }
+    },
+    "C58.capturedRelationChanges": {
+      "publicApi": "Model.delete and reflected onDelete",
+      "limits": "Local restrict leaves database unchanged. Cascade hides related rows and pivot membership within the same owned transaction.",
+      "local": {
+        "source": "packages/client/tests/relations-conformance.test.ts",
+        "testcase": "C58 declared cascade/restrict and real deferred SQLite constraints preserve atomic deletion and alias remapping",
+        "report": "client"
+      }
+    },
+    "C48.commandLostResponse": {
+      "publicApi": "SyncEngine.command",
+      "limits": "Unit witness only, injected transport ledger asserts one effect across restart and reused immutable operation identity.",
+      "local": {
+        "source": "packages/client/tests/compatibility.test.ts",
+        "testcase": "C48 command immutable identity survives lost response/restart and enforces declared argument/result projections",
+        "report": "client"
+      }
+    },
+    "C46.unsupportedOfflineScope": {
+      "publicApi": "Query.scope/lockForUpdate/sharedLock",
+      "limits": "Offline scope and arbitrary transaction locks reject explicitly. Registered remote command/scopes remain separate APIs.",
+      "local": {
+        "source": "packages/client/tests/compatibility.test.ts",
+        "testcase": "C46 C49 C50 registered remote scopes validate transport mode and unsupported local server execution is explicit",
+        "report": "client"
+      }
+    },
+    "C49.unsupportedLocalLock": {
+      "publicApi": "Query.scope/lockForUpdate/sharedLock",
+      "limits": "Offline scope and arbitrary transaction locks reject explicitly. Registered remote command/scopes remain separate APIs.",
+      "local": {
+        "source": "packages/client/tests/compatibility.test.ts",
+        "testcase": "C46 C49 C50 registered remote scopes validate transport mode and unsupported local server execution is explicit",
+        "report": "client"
+      }
+    },
+    "C50.unsupportedUnregisteredSql": {
+      "publicApi": "Query.whereRaw/selectRaw",
+      "limits": "Offline scope and arbitrary transaction locks reject explicitly. Registered remote command/scopes remain separate APIs.",
+      "local": {
+        "source": "packages/client/tests/compatibility.test.ts",
+        "testcase": "C46 C49 C50 registered remote scopes validate transport mode and unsupported local server execution is explicit",
+        "report": "client"
+      }
+    },
+    "C02.find": {
+      "publicApi": "C02.find",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C02 identity retrieval and not-found boundaries",
+        "report": "client"
+      }
+    },
+    "C02.findOrFail": {
+      "publicApi": "C02.findOrFail",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C02 identity retrieval and not-found boundaries",
+        "report": "client"
+      }
+    },
+    "C02.first": {
+      "publicApi": "C02.first",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C02 identity retrieval and not-found boundaries",
+        "report": "client"
+      }
+    },
+    "C02.firstOrFail": {
+      "publicApi": "C02.firstOrFail",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C02 identity retrieval and not-found boundaries",
+        "report": "client"
+      }
+    },
+    "C02.get": {
+      "publicApi": "C02.get",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C02 identity retrieval and not-found boundaries",
+        "report": "client"
+      }
+    },
+    "C02.all": {
+      "publicApi": "C02.all",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C02 identity retrieval and not-found boundaries",
+        "report": "client"
+      }
+    },
+    "C09.select": {
+      "publicApi": "C09.select",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C09 projections and stable distinct representative",
+        "report": "client"
+      }
+    },
+    "C09.addSelect": {
+      "publicApi": "C09.addSelect",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C09 projections and stable distinct representative",
+        "report": "client"
+      }
+    },
+    "C09.distinct": {
+      "publicApi": "C09.distinct",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C09 projections and stable distinct representative",
+        "report": "client"
+      }
+    },
+    "C10.where": {
+      "publicApi": "C10.where",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C10 bound comparison and grouped boolean construction",
+        "report": "client"
+      }
+    },
+    "C10.orWhere": {
+      "publicApi": "C10.orWhere",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C10 bound comparison and grouped boolean construction",
+        "report": "client"
+      }
+    },
+    "C10.groupedAnd": {
+      "publicApi": "C10.groupedAnd",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C10 bound comparison and grouped boolean construction",
+        "report": "client"
+      }
+    },
+    "C10.groupedOr": {
+      "publicApi": "C10.groupedOr",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C10 bound comparison and grouped boolean construction",
+        "report": "client"
+      }
+    },
+    "C10.groupedNot": {
+      "publicApi": "C10.groupedNot",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C10 bound comparison and grouped boolean construction",
+        "report": "client"
+      }
+    },
+    "C10.whereColumn": {
+      "publicApi": "C10.whereColumn",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C10 bound comparison and grouped boolean construction",
+        "report": "client"
+      }
+    },
+    "C11.whereIn": {
+      "publicApi": "C11.whereIn",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C11 membership null and range operators",
+        "report": "client"
+      }
+    },
+    "C11.whereNotIn": {
+      "publicApi": "C11.whereNotIn",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C11 membership null and range operators",
+        "report": "client"
+      }
+    },
+    "C11.whereNull": {
+      "publicApi": "C11.whereNull",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C11 membership null and range operators",
+        "report": "client"
+      }
+    },
+    "C11.whereNotNull": {
+      "publicApi": "C11.whereNotNull",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C11 membership null and range operators",
+        "report": "client"
+      }
+    },
+    "C11.whereBetween": {
+      "publicApi": "C11.whereBetween",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C11 membership null and range operators",
+        "report": "client"
+      }
+    },
+    "C11.whereNotBetween": {
+      "publicApi": "C11.whereNotBetween",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C11 membership null and range operators",
+        "report": "client"
+      }
+    },
+    "C12.like": {
+      "publicApi": "C12.like",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C12 ASCII LIKE and binary equality have explicit Unicode behavior",
+        "report": "client"
+      }
+    },
+    "C12.caseSensitiveComparison": {
+      "publicApi": "C12.caseSensitiveComparison",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C12 ASCII LIKE and binary equality have explicit Unicode behavior",
+        "report": "client"
+      }
+    },
+    "C12.unicodeComparison": {
+      "publicApi": "C12.unicodeComparison",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C12 ASCII LIKE and binary equality have explicit Unicode behavior",
+        "report": "client"
+      }
+    },
+    "C13.jsonScalarArrayContains": {
+      "publicApi": "C13.jsonScalarArrayContains",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C13 scalar JSON arrays retain null and scalar type distinctions",
+        "report": "client"
+      }
+    },
+    "C13.jsonNullArrayContains": {
+      "publicApi": "C13.jsonNullArrayContains",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C13 scalar JSON arrays retain null and scalar type distinctions",
+        "report": "client"
+      }
+    },
+    "C13.jsonScalarPath": {
+      "publicApi": "C13.jsonScalarPath",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C13 scalar JSON arrays retain null and scalar type distinctions",
+        "report": "client"
+      }
+    },
+    "C13.unsupportedLocalObjectContains": {
+      "publicApi": "C13.unsupportedLocalObjectContains",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C13 scalar JSON arrays retain null and scalar type distinctions",
+        "report": "client"
+      }
+    },
+    "C14.orderBy": {
+      "publicApi": "C14.orderBy",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C14 C15 explicit ordering stable ties and pagination bounds",
+        "report": "client"
+      }
+    },
+    "C14.orderByDesc": {
+      "publicApi": "C14.orderByDesc",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C14 C15 explicit ordering stable ties and pagination bounds",
+        "report": "client"
+      }
+    },
+    "C14.reorder": {
+      "publicApi": "C14.reorder",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C14 C15 explicit ordering stable ties and pagination bounds",
+        "report": "client"
+      }
+    },
+    "C14.latest": {
+      "publicApi": "C14.latest",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C14 C15 explicit ordering stable ties and pagination bounds",
+        "report": "client"
+      }
+    },
+    "C14.oldest": {
+      "publicApi": "C14.oldest",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C14 C15 explicit ordering stable ties and pagination bounds",
+        "report": "client"
+      }
+    },
+    "C14.identityTiebreaker": {
+      "publicApi": "C14.identityTiebreaker",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C14 C15 explicit ordering stable ties and pagination bounds",
+        "report": "client"
+      }
+    },
+    "C15.limit": {
+      "publicApi": "C15.limit",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C14 C15 explicit ordering stable ties and pagination bounds",
+        "report": "client"
+      }
+    },
+    "C15.take": {
+      "publicApi": "C15.take",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C14 C15 explicit ordering stable ties and pagination bounds",
+        "report": "client"
+      }
+    },
+    "C15.offset": {
+      "publicApi": "C15.offset",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C14 C15 explicit ordering stable ties and pagination bounds",
+        "report": "client"
+      }
+    },
+    "C15.skip": {
+      "publicApi": "C15.skip",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C14 C15 explicit ordering stable ties and pagination bounds",
+        "report": "client"
+      }
+    },
+    "C16.value": {
+      "publicApi": "C16.value",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C16 scalar field/existence and exact aggregate results",
+        "report": "client"
+      }
+    },
+    "C16.pluck": {
+      "publicApi": "C16.pluck",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C16 scalar field/existence and exact aggregate results",
+        "report": "client"
+      }
+    },
+    "C16.exists": {
+      "publicApi": "C16.exists",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C16 scalar field/existence and exact aggregate results",
+        "report": "client"
+      }
+    },
+    "C16.doesntExist": {
+      "publicApi": "C16.doesntExist",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C16 scalar field/existence and exact aggregate results",
+        "report": "client"
+      }
+    },
+    "C16.count": {
+      "publicApi": "C16.count",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C16 scalar field/existence and exact aggregate results",
+        "report": "client"
+      }
+    },
+    "C16.min": {
+      "publicApi": "C16.min",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C16 scalar field/existence and exact aggregate results",
+        "report": "client"
+      }
+    },
+    "C16.max": {
+      "publicApi": "C16.max",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C16 scalar field/existence and exact aggregate results",
+        "report": "client"
+      }
+    },
+    "C16.sum": {
+      "publicApi": "C16.sum",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C16 scalar field/existence and exact aggregate results",
+        "report": "client"
+      }
+    },
+    "C16.avg": {
+      "publicApi": "C16.avg",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C16 scalar field/existence and exact aggregate results",
+        "report": "client"
+      }
+    },
+    "C17.groupBy": {
+      "publicApi": "Query.groupBy/having/aggregateGroups",
+      "limits": "SQLite selects authorized visible canonical/proposal rows, then exact integer/decimal reduction prevents driver float coercion. Group key ordering and pagination occur after grouping. $aggregate accepts exact numeric strings. Remote aggregation shares session/schema/completeness validation.",
+      "local": {
+        "source": "packages/client/tests/query-conformance.test.ts",
+        "testcase": "C16 C17 grouped canonical integer and decimal sums averages and having remain exact beyond JavaScript safe range",
+        "report": "client"
+      }
+    },
+    "C17.having": {
+      "publicApi": "Query.groupBy/having/aggregateGroups",
+      "limits": "SQLite selects authorized visible canonical/proposal rows, then exact integer/decimal reduction prevents driver float coercion. Group key ordering and pagination occur after grouping. $aggregate accepts exact numeric strings. Remote aggregation shares session/schema/completeness validation.",
+      "local": {
+        "source": "packages/client/tests/query-conformance.test.ts",
+        "testcase": "C16 C17 grouped canonical integer and decimal sums averages and having remain exact beyond JavaScript safe range",
+        "report": "client"
+      }
+    },
+    "C18.paginate": {
+      "publicApi": "C18.paginate",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C18 pages and scope-bound keyset cursor survive boundary progression",
+        "report": "client"
+      }
+    },
+    "C18.simplePaginate": {
+      "publicApi": "C18.simplePaginate",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C18 pages and scope-bound keyset cursor survive boundary progression",
+        "report": "client"
+      }
+    },
+    "C18.cursorPaginate": {
+      "publicApi": "C18.cursorPaginate",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C18 pages and scope-bound keyset cursor survive boundary progression",
+        "report": "client"
+      }
+    },
+    "C18.cursorScope": {
+      "publicApi": "C18.cursorScope",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C18 pages and scope-bound keyset cursor survive boundary progression",
+        "report": "client"
+      }
+    },
+    "C19.chunk": {
+      "publicApi": "C19.chunk",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C19 all async iteration methods traverse bounded pages",
+        "report": "client"
+      }
+    },
+    "C19.chunkById": {
+      "publicApi": "C19.chunkById",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C19 all async iteration methods traverse bounded pages",
+        "report": "client"
+      }
+    },
+    "C19.lazy": {
+      "publicApi": "C19.lazy",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C19 all async iteration methods traverse bounded pages",
+        "report": "client"
+      }
+    },
+    "C19.lazyById": {
+      "publicApi": "C19.lazyById",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C19 all async iteration methods traverse bounded pages",
+        "report": "client"
+      }
+    },
+    "C19.cursor": {
+      "publicApi": "C19.cursor",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C19 all async iteration methods traverse bounded pages",
+        "report": "client"
+      }
+    },
+    "C20.when": {
+      "publicApi": "C20.when",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C20 conditional immutable branches retain the original builder",
+        "report": "client"
+      }
+    },
+    "C20.unless": {
+      "publicApi": "C20.unless",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C20 conditional immutable branches retain the original builder",
+        "report": "client"
+      }
+    },
+    "C20.immutableBranches": {
+      "publicApi": "C20.immutableBranches",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C20 conditional immutable branches retain the original builder",
+        "report": "client"
+      }
+    },
+    "C21.join": {
+      "publicApi": "C21.join",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C21 explicit authorized joins preserve base projection",
+        "report": "client"
+      }
+    },
+    "C21.leftJoin": {
+      "publicApi": "C21.leftJoin",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C21 explicit authorized joins preserve base projection",
+        "report": "client"
+      }
+    },
+    "C21.joinedAuthorization": {
+      "publicApi": "C21.joinedAuthorization",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C21 explicit authorized joins preserve base projection",
+        "report": "client"
+      }
+    },
+    "C22.selectSub": {
+      "publicApi": "C22.selectSub",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C22 scalar and correlated subqueries plus ordered union variants",
+        "report": "client"
+      }
+    },
+    "C22.whereSub": {
+      "publicApi": "C22.whereSub",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C22 scalar and correlated subqueries plus ordered union variants",
+        "report": "client"
+      }
+    },
+    "C22.whereExists": {
+      "publicApi": "C22.whereExists",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C22 scalar and correlated subqueries plus ordered union variants",
+        "report": "client"
+      }
+    },
+    "C22.whereNotExists": {
+      "publicApi": "C22.whereNotExists",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C22 scalar and correlated subqueries plus ordered union variants",
+        "report": "client"
+      }
+    },
+    "C22.union": {
+      "publicApi": "C22.union",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C22 scalar and correlated subqueries plus ordered union variants",
+        "report": "client"
+      }
+    },
+    "C22.unionAll": {
+      "publicApi": "C22.unionAll",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C22 scalar and correlated subqueries plus ordered union variants",
+        "report": "client"
+      }
+    },
+    "C35.with": {
+      "publicApi": "C35.with",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C35 eager nesting constraints and relation field projection",
+        "report": "client"
+      }
+    },
+    "C35.nestedWith": {
+      "publicApi": "C35.nestedWith",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C35 eager nesting constraints and relation field projection",
+        "report": "client"
+      }
+    },
+    "C35.constrainedWith": {
+      "publicApi": "C35.constrainedWith",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C35 eager nesting constraints and relation field projection",
+        "report": "client"
+      }
+    },
+    "C35.eagerFieldSelection": {
+      "publicApi": "C35.eagerFieldSelection",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C35 eager nesting constraints and relation field projection",
+        "report": "client"
+      }
+    },
+    "C37.has": {
+      "publicApi": "C37.has",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C37 relation counts predicates and every OR variant",
+        "report": "client"
+      }
+    },
+    "C37.doesntHave": {
+      "publicApi": "C37.doesntHave",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C37 relation counts predicates and every OR variant",
+        "report": "client"
+      }
+    },
+    "C37.whereHas": {
+      "publicApi": "C37.whereHas",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C37 relation counts predicates and every OR variant",
+        "report": "client"
+      }
+    },
+    "C37.whereDoesntHave": {
+      "publicApi": "C37.whereDoesntHave",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C37 relation counts predicates and every OR variant",
+        "report": "client"
+      }
+    },
+    "C37.orHas": {
+      "publicApi": "C37.orHas",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C37 relation counts predicates and every OR variant",
+        "report": "client"
+      }
+    },
+    "C37.orDoesntHave": {
+      "publicApi": "C37.orDoesntHave",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C37 relation counts predicates and every OR variant",
+        "report": "client"
+      }
+    },
+    "C37.orWhereHas": {
+      "publicApi": "C37.orWhereHas",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C37 relation counts predicates and every OR variant",
+        "report": "client"
+      }
+    },
+    "C37.orWhereDoesntHave": {
+      "publicApi": "C37.orWhereDoesntHave",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C37 relation counts predicates and every OR variant",
+        "report": "client"
+      }
+    },
+    "C38.whereRelation": {
+      "publicApi": "C38.whereRelation",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C38 related field and explicit belongs-to filters",
+        "report": "client"
+      }
+    },
+    "C38.whereBelongsTo": {
+      "publicApi": "C38.whereBelongsTo",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C38 related field and explicit belongs-to filters",
+        "report": "client"
+      }
+    },
+    "C38.whereMorphRelation": {
+      "publicApi": "C38.whereMorphRelation",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C38 morph relation predicates retain explicit target identity and type",
+        "report": "client"
+      }
+    },
+    "C39.withCount": {
+      "publicApi": "C39.withCount",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C39 batched readonly relation aggregate metadata",
+        "report": "client"
+      }
+    },
+    "C39.withExists": {
+      "publicApi": "C39.withExists",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C39 batched readonly relation aggregate metadata",
+        "report": "client"
+      }
+    },
+    "C39.withSum": {
+      "publicApi": "C39.withSum",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C39 batched readonly relation aggregate metadata",
+        "report": "client"
+      }
+    },
+    "C39.withMin": {
+      "publicApi": "C39.withMin",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C39 batched readonly relation aggregate metadata",
+        "report": "client"
+      }
+    },
+    "C39.withMax": {
+      "publicApi": "C39.withMax",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C39 batched readonly relation aggregate metadata",
+        "report": "client"
+      }
+    },
+    "C39.withAvg": {
+      "publicApi": "C39.withAvg",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C39 batched readonly relation aggregate metadata",
+        "report": "client"
+      }
+    },
+    "C28.belongsTo": {
+      "publicApi": "C28.belongsTo",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+        "report": "client"
+      }
+    },
+    "C29.hasOne": {
+      "publicApi": "C29.hasOne",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+        "report": "client"
+      }
+    },
+    "C29.hasMany": {
+      "publicApi": "C29.hasMany",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+        "report": "client"
+      }
+    },
+    "C30.belongsToMany": {
+      "publicApi": "C30.belongsToMany",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+        "report": "client"
+      }
+    },
+    "C30.customPivotTable": {
+      "publicApi": "C30.customPivotTable",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+        "report": "client"
+      }
+    },
+    "C30.customPivotKeys": {
+      "publicApi": "C30.customPivotKeys",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+        "report": "client"
+      }
+    },
+    "C30.compositePivotIdentity": {
+      "publicApi": "C30.compositePivotIdentity",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+        "report": "client"
+      }
+    },
+    "C31.hasOneThrough": {
+      "publicApi": "C31.hasOneThrough",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+        "report": "client"
+      }
+    },
+    "C31.hasManyThrough": {
+      "publicApi": "C31.hasManyThrough",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+        "report": "client"
+      }
+    },
+    "C32.morphTo": {
+      "publicApi": "C32.morphTo",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+        "report": "client"
+      }
+    },
+    "C32.morphOne": {
+      "publicApi": "C32.morphOne",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+        "report": "client"
+      }
+    },
+    "C32.morphMany": {
+      "publicApi": "C32.morphMany",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+        "report": "client"
+      }
+    },
+    "C32.explicitMorphMap": {
+      "publicApi": "C32.explicitMorphMap",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+        "report": "client"
+      }
+    },
+    "C33.morphToMany": {
+      "publicApi": "C33.morphToMany",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+        "report": "client"
+      }
+    },
+    "C33.morphedByMany": {
+      "publicApi": "C33.morphedByMany",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+        "report": "client"
+      }
+    },
+    "C36.load": {
+      "publicApi": "C36.load",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C36 explicit lazy loading has no property IO and loads only missing caches",
+        "report": "client"
+      }
+    },
+    "C36.loadMissing": {
+      "publicApi": "C36.loadMissing",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C36 explicit lazy loading has no property IO and loads only missing caches",
+        "report": "client"
+      }
+    },
+    "C36.batchedLazyLoading": {
+      "publicApi": "C36.batchedLazyLoading",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C36 explicit lazy loading has no property IO and loads only missing caches",
+        "report": "client"
+      }
+    },
+    "C36.noHiddenPropertyIO": {
+      "publicApi": "C36.noHiddenPropertyIO",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C36 explicit lazy loading has no property IO and loads only missing caches",
+        "report": "client"
+      }
+    },
+    "C39.loadCount": {
+      "publicApi": "C39.loadCount",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C39 explicit loaded aggregates retain read-only result metadata",
+        "report": "client"
+      }
+    },
+    "C39.loadExists": {
+      "publicApi": "C39.loadExists",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C39 explicit loaded aggregates retain read-only result metadata",
+        "report": "client"
+      }
+    },
+    "C39.loadSum": {
+      "publicApi": "C39.loadSum",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C39 explicit loaded aggregates retain read-only result metadata",
+        "report": "client"
+      }
+    },
+    "C39.loadMin": {
+      "publicApi": "C39.loadMin",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C39 explicit loaded aggregates retain read-only result metadata",
+        "report": "client"
+      }
+    },
+    "C39.loadMax": {
+      "publicApi": "C39.loadMax",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C39 explicit loaded aggregates retain read-only result metadata",
+        "report": "client"
+      }
+    },
+    "C39.loadAvg": {
+      "publicApi": "C39.loadAvg",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C39 explicit loaded aggregates retain read-only result metadata",
+        "report": "client"
+      }
+    },
+    "C40.pivotAttributes": {
+      "publicApi": "C40.pivotAttributes",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C40 pivot projection casts filters and ordering use exported attributes",
+        "report": "client"
+      }
+    },
+    "C40.withPivot": {
+      "publicApi": "C40.withPivot",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C40 pivot projection casts filters and ordering use exported attributes",
+        "report": "client"
+      }
+    },
+    "C40.pivotCast": {
+      "publicApi": "C40.pivotCast",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C40 pivot projection casts filters and ordering use exported attributes",
+        "report": "client"
+      }
+    },
+    "C40.wherePivot": {
+      "publicApi": "C40.wherePivot",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C40 pivot projection casts filters and ordering use exported attributes",
+        "report": "client"
+      }
+    },
+    "C40.orderByPivot": {
+      "publicApi": "C40.orderByPivot",
+      "limits": "Declared portable AST and generated authorized catalog metadata. Independent expected record identities or scalar values are asserted.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C40 pivot projection casts filters and ordering use exported attributes",
+        "report": "client"
+      }
+    },
+    "C29.customForeignKey": {
+      "publicApi": "Query.with/whereHas/withConstrained and Relation.create/associate with reflected custom keys and oneOfMany",
+      "limits": "Ordered aggregates choose rank MAX + id MIN =>2, latest rank MAX + id MAX =>3 and oldest rank MIN + id MAX =>4. Constraints apply after selecting the winner.",
+      "local": {
+        "source": "packages/client/tests/relations-conformance.test.ts",
+        "testcase": "C29 C34 custom primary/foreign/local keys and ordered one-of-many ties select the same declared winner",
+        "report": "client"
+      }
+    },
+    "C29.customLocalKey": {
+      "publicApi": "Relation.create/get with belongsTo ownerKey, hasMany localKey and deferred SQLite references",
+      "limits": "Nonprimary unique owner keys remain natural values during primary-key alias assignment. Active references enforce orphan and restrict rejection. Hidden canonical history releases reused keys and preserves recovery. Declared natural-key cascade uses local overlays and canonical acceptance.",
+      "local": {
+        "source": "packages/client/tests/relations-conformance.test.ts",
+        "testcase": "C29 C58 nonprimary unique owner keys enforce SQLite references preserve natural values across aliases and retire deleted keys",
+        "report": "client"
+      }
+    },
+    "C34.ofMany": {
+      "publicApi": "Query.with/whereHas/withConstrained and Relation.create/associate with reflected custom keys and oneOfMany",
+      "limits": "Ordered aggregates choose rank MAX + id MIN =>2, latest rank MAX + id MAX =>3 and oldest rank MIN + id MAX =>4. Constraints apply after selecting the winner.",
+      "local": {
+        "source": "packages/client/tests/relations-conformance.test.ts",
+        "testcase": "C29 C34 custom primary/foreign/local keys and ordered one-of-many ties select the same declared winner",
+        "report": "client"
+      }
+    },
+    "C34.latestOfMany": {
+      "publicApi": "Query.with/whereHas/withConstrained and Relation.create/associate with reflected custom keys and oneOfMany",
+      "limits": "Ordered aggregates choose rank MAX + id MIN =>2, latest rank MAX + id MAX =>3 and oldest rank MIN + id MAX =>4. Constraints apply after selecting the winner.",
+      "local": {
+        "source": "packages/client/tests/relations-conformance.test.ts",
+        "testcase": "C29 C34 custom primary/foreign/local keys and ordered one-of-many ties select the same declared winner",
+        "report": "client"
+      }
+    },
+    "C34.oldestOfMany": {
+      "publicApi": "Query.with/whereHas/withConstrained and Relation.create/associate with reflected custom keys and oneOfMany",
+      "limits": "Ordered aggregates choose rank MAX + id MIN =>2, latest rank MAX + id MAX =>3 and oldest rank MIN + id MAX =>4. Constraints apply after selecting the winner.",
+      "local": {
+        "source": "packages/client/tests/relations-conformance.test.ts",
+        "testcase": "C29 C34 custom primary/foreign/local keys and ordered one-of-many ties select the same declared winner",
+        "report": "client"
+      }
+    },
+    "C34.deterministicTie": {
+      "publicApi": "Query.with/whereHas/withConstrained and Relation.create/associate with reflected custom keys and oneOfMany",
+      "limits": "Ordered aggregates choose rank MAX + id MIN =>2, latest rank MAX + id MAX =>3 and oldest rank MIN + id MAX =>4. Constraints apply after selecting the winner.",
+      "local": {
+        "source": "packages/client/tests/relations-conformance.test.ts",
+        "testcase": "C29 C34 custom primary/foreign/local keys and ordered one-of-many ties select the same declared winner",
+        "report": "client"
+      }
+    },
+    "C51.modelSubscription": {
+      "publicApi": "client.observe(identity-constrained Query), QuerySubscription.refresh/dispose, sync.installSnapshot, client.setSession",
+      "limits": "Model observation uses a public identity-constrained query. Logout cleanup explicitly disposes the subscription. Authorization removal retains restricted recovery evidence.",
+      "local": {
+        "source": "packages/client/tests/state-boundaries.test.ts",
+        "testcase": "C51 C52 model subscription publishes committed membership across authorization replacement and logout cleanup",
+        "report": "client"
+      }
+    },
+    "C51.logoutCleanup": {
+      "publicApi": "client.observe(identity-constrained Query), QuerySubscription.refresh/dispose, sync.installSnapshot, client.setSession",
+      "limits": "Model observation uses a public identity-constrained query. Logout cleanup explicitly disposes the subscription. Authorization removal retains restricted recovery evidence.",
+      "local": {
+        "source": "packages/client/tests/state-boundaries.test.ts",
+        "testcase": "C51 C52 model subscription publishes committed membership across authorization replacement and logout cleanup",
+        "report": "client"
+      }
+    },
+    "C51.replacementCleanup": {
+      "publicApi": "client.observe(identity-constrained Query), QuerySubscription.refresh/dispose, sync.installSnapshot, client.setSession",
+      "limits": "Model observation uses a public identity-constrained query. Logout cleanup explicitly disposes the subscription. Authorization removal retains restricted recovery evidence.",
+      "local": {
+        "source": "packages/client/tests/state-boundaries.test.ts",
+        "testcase": "C51 C52 model subscription publishes committed membership across authorization replacement and logout cleanup",
+        "report": "client"
+      }
+    },
+    "C52.completeDataset": {
+      "publicApi": "client.observe(identity-constrained Query), QuerySubscription.refresh/dispose, sync.installSnapshot, client.setSession",
+      "limits": "Model observation uses a public identity-constrained query. Logout cleanup explicitly disposes the subscription. Authorization removal retains restricted recovery evidence.",
+      "local": {
+        "source": "packages/client/tests/state-boundaries.test.ts",
+        "testcase": "C51 C52 model subscription publishes committed membership across authorization replacement and logout cleanup",
+        "report": "client"
+      }
+    },
+    "C52.subscriptionMembership": {
+      "publicApi": "client.observe(identity-constrained Query), QuerySubscription.refresh/dispose, sync.installSnapshot, client.setSession",
+      "limits": "Model observation uses a public identity-constrained query. Logout cleanup explicitly disposes the subscription. Authorization removal retains restricted recovery evidence.",
+      "local": {
+        "source": "packages/client/tests/state-boundaries.test.ts",
+        "testcase": "C51 C52 model subscription publishes committed membership across authorization replacement and logout cleanup",
+        "report": "client"
+      }
+    },
+    "C52.authorizationGeneration": {
+      "publicApi": "client.observe(identity-constrained Query), QuerySubscription.refresh/dispose, sync.installSnapshot, client.setSession",
+      "limits": "Model observation uses a public identity-constrained query. Logout cleanup explicitly disposes the subscription. Authorization removal retains restricted recovery evidence.",
+      "local": {
+        "source": "packages/client/tests/state-boundaries.test.ts",
+        "testcase": "C51 C52 model subscription publishes committed membership across authorization replacement and logout cleanup",
+        "report": "client"
+      }
+    },
+    "C56.devicePartition": {
+      "publicApi": "client.setSession and Model.attributes",
+      "limits": "Account, tenant, device and epoch form the persisted partition. Returning to the original partition restores its own durable pending row.",
+      "local": {
+        "source": "packages/client/tests/state-boundaries.test.ts",
+        "testcase": "C56 device and epoch partitions invalidate old instances and keep distinct durable rows",
+        "report": "client"
+      }
+    },
+    "C56.epochSeparation": {
+      "publicApi": "client.setSession and Model.attributes",
+      "limits": "Account, tenant, device and epoch form the persisted partition. Returning to the original partition restores its own durable pending row.",
+      "local": {
+        "source": "packages/client/tests/state-boundaries.test.ts",
+        "testcase": "C56 device and epoch partitions invalidate old instances and keep distinct durable rows",
+        "report": "client"
+      }
+    },
+    "C53.rejected": {
+      "publicApi": "Model.saveConfirmed/update, sync.confirmed/status/resolveConflict",
+      "limits": "Injected protocol receipt is a supplemental boundary witness. Unknown host error codes remain in receiptError details. Actual HTTP authorization remains separately qualified.",
+      "local": {
+        "source": "packages/client/tests/state-boundaries.test.ts",
+        "testcase": "C53 C57 host rejection retains proposal and explicit discard restores accepted canonical base",
+        "report": "client"
+      }
+    },
+    "C57.discardConflict": {
+      "publicApi": "sync.flush/resolveConflict(discard)/status, Model.update/delete and Query.get",
+      "limits": "Actual SQLite exercises cascade and nullify with an accepted parent key update followed by rejected or conflicted deletion. String, exact integer and decimal nonprimary keys work with integer and custom string primary keys. Canonical child FK is asserted immediately after receipt before discard. Independent child field, reassociation, null and delete proposals, revoked membership, immutable attempted intent and accepted receipts survive resolution and two restarts.",
+      "local": {
+        "source": "packages/client/tests/delete-owner-key.test.ts",
+        "testcase": "C29 C53 C57 C58 accepted natural key changes survive rejected or conflicted owner deletes with explicit child proposals membership and restart",
+        "report": "client"
+      }
+    },
+    "C25.atomicDeltaConflict": {
+      "publicApi": "Model.increment and sync.resolveConflict(retry)",
+      "limits": "The injected transport asserts the actual immutable delta action and revision. Exact unsafe integer strings survive canonical conflict ingestion and retry.",
+      "local": {
+        "source": "packages/client/tests/state-boundaries.test.ts",
+        "testcase": "C25 atomic delta conflict preserves exact canonical integer and retries the immutable delta action",
+        "report": "client"
+      }
+    },
+    "C58.nullifyDelete": {
+      "publicApi": "Model.delete, sync.installSnapshot/pull/cancel/status, canonical and effective FK projections",
+      "limits": "Nullify retains the canonical FK, overlays null for newly received canonical children and keeps explicit FK proposals. Pull removals stay hidden after cancel and restart. Cascade recursively hides new grandchildren before publication.",
+      "local": {
+        "source": "packages/client/tests/delete-cancellation.test.ts",
+        "testcase": "C55 C57 C58 new bulk snapshot descendants inherit pending delete overlays before publication in either record order",
+        "report": "client"
+      }
+    },
+    "C58.pendingDependencyDelete": {
+      "publicApi": "Model.delete, sync.installSnapshot/pull/cancel, effective FK proposals and committed descendant queries",
+      "limits": "Actual SQLite covers new bulk children and new grandchildren in parent-first and child-first snapshots, child-first pull, explicit FK reassociation and null, authorization removal, cancellation and restart. Indexed replay scans only matching descendants. Separate assertions retain other parent deletes and explicit child delete intents.",
+      "local": {
+        "source": "packages/client/tests/delete-cancellation.test.ts",
+        "testcase": "C55 C57 C58 new bulk snapshot descendants inherit pending delete overlays before publication in either record order",
+        "report": "client"
+      }
+    },
+    "C13.jsonObjectContainsRemote": {
+      "publicApi": "Query.where(metadata, jsonContains, object).get in local mode",
+      "limits": "Object containment requires a registered remote scope. This local boundary deliberately rejects an object query rather than promising portable containment.",
+      "local": {
+        "source": "packages/client/tests/capability-scenarios.ts",
+        "testcase": "local portable C13 scalar JSON arrays retain null and scalar type distinctions",
+        "report": "client"
+      }
+    },
+    "C55.download": {
+      "publicApi": "sync.resnapshot and installSnapshot for transport-provided downloaded Snapshot",
+      "limits": "Core does not fetch downloadUrl. This injected protocol document proves verified local activation and tamper rejection. Authenticated HTTP URL fetching is separately witnessed in integration.",
+      "local": {
+        "source": "packages/client/tests/snapshot.test.ts",
+        "testcase": "C55 downloaded immutable document enters the same verified snapshot activation boundary",
+        "report": "client"
+      }
+    },
+    "C06.integerCast": {
+      "publicApi": "ModelBinding.new, Model.fill/save, Model.attributes and readable serialization",
+      "limits": "Unsafe integer strings remain exact. Unsafe JavaScript numbers, leading-zero strings, leading plus and signed string zero are rejected. Canonical string zero and numeric zero pass.",
+      "local": {
+        "source": "packages/client/tests/durability.test.ts",
+        "testcase": "C06 C08 casts reject invalid finite/date/enum input and readable serialization excludes hidden values",
+        "report": "client"
+      }
+    },
+    "C51.unmountCleanup": {
+      "publicApi": "useSynloquentQuery(client, query) and mounted React component unmount",
+      "limits": "Mounted Release Hermes React Native consumers on both iOS and Android, owner listeners removed after actual HTTP synchronization. Native qualification is mandatory.",
+      "local": {
+        "source": "examples/react-native/src/nativeQualification.ts",
+        "testcase": "ios-full-native",
+        "report": "native"
+      },
+      "remote": {
+        "source": "examples/react-native/src/nativeQualification.ts",
+        "testcase": "ios-full-native",
+        "report": "native"
+      }
+    }
+  },
+  "unmappedMethods": [
+    "C01.customKey",
+    "C01.integerKey",
+    "C01.localIdentity",
+    "C01.stringKey",
+    "C01.ulid",
+    "C01.uuid",
+    "C03.create",
+    "C03.delete",
+    "C03.fill",
+    "C03.forceFill",
+    "C03.save",
+    "C03.update",
+    "C04.canonicalProposalDistinction",
+    "C04.fresh",
+    "C04.getChanges",
+    "C04.getOriginal",
+    "C04.isClean",
+    "C04.isDirty",
+    "C04.refresh",
+    "C04.wasChanged",
+    "C05.defaults",
+    "C05.nonIncrementingKey",
+    "C05.replicate",
+    "C05.timestamps",
+    "C05.touch",
+    "C06.booleanCast",
+    "C06.dateCast",
+    "C06.datetimeCast",
+    "C06.decimalCast",
+    "C06.enumCast",
+    "C06.floatPrecision",
+    "C06.jsonCast",
+    "C06.stringCast",
+    "C07.accessor",
+    "C07.customCast",
+    "C07.materializedAppend",
+    "C07.offlineAvailability",
+    "C08.hiddenSerialization",
+    "C08.readableProjection",
+    "C08.visibleSerialization",
+    "C08.writableProjection",
+    "C23.firstOrCreate",
+    "C23.firstOrNew",
+    "C23.updateOrCreate",
+    "C24.batchAtomicity",
+    "C24.bulkDelete",
+    "C24.bulkEventDistinction",
+    "C24.bulkUpdate",
+    "C24.insert",
+    "C24.upsert",
+    "C25.decrement",
+    "C25.increment",
+    "C27.atomicFailure",
+    "C27.atomicGroup",
+    "C27.causalDependency",
+    "C28.associate",
+    "C28.dissociate",
+    "C41.attach",
+    "C41.detach",
+    "C41.relationRevision",
+    "C41.toggle",
+    "C41.updateExistingPivot",
+    "C43.relatedDelete",
+    "C43.relationCreate",
+    "C43.relationCreateMany",
+    "C43.relationSave",
+    "C43.relationSaveMany",
+    "C44.forceDeleteAuthorization",
+    "C44.onlyTrashed",
+    "C44.restore",
+    "C44.softDelete",
+    "C44.withTrashed",
+    "C46.globalScope",
+    "C46.localScopeRemote",
+    "C46.scopeInputValidation",
+    "C47.bulkBypassesInstanceEvents",
+    "C47.creatingCreated",
+    "C47.deletingDeleted",
+    "C47.observer",
+    "C47.updatingUpdated",
+    "C48.atLeastOnceControl",
+    "C48.commandAuthorization",
+    "C48.downstreamIdempotency",
+    "C48.durableEffect",
+    "C48.typedCommand",
+    "C49.lockForUpdate",
+    "C49.sharedLock",
+    "C50.registeredExpression",
+    "C50.registeredSqlFunction"
+  ],
+  "unmapped": [
+    "C01.customKey",
+    "C01.integerKey",
+    "C01.localIdentity",
+    "C01.stringKey",
+    "C01.ulid",
+    "C01.uuid",
+    "C03.create",
+    "C03.delete",
+    "C03.fill",
+    "C03.forceFill",
+    "C03.save",
+    "C03.update",
+    "C04.canonicalProposalDistinction",
+    "C04.fresh",
+    "C04.getChanges",
+    "C04.getOriginal",
+    "C04.isClean",
+    "C04.isDirty",
+    "C04.refresh",
+    "C04.wasChanged",
+    "C05.defaults",
+    "C05.nonIncrementingKey",
+    "C05.replicate",
+    "C05.timestamps",
+    "C05.touch",
+    "C06.booleanCast",
+    "C06.dateCast",
+    "C06.datetimeCast",
+    "C06.decimalCast",
+    "C06.enumCast",
+    "C06.floatPrecision",
+    "C06.jsonCast",
+    "C06.stringCast",
+    "C07.accessor",
+    "C07.customCast",
+    "C07.materializedAppend",
+    "C07.offlineAvailability",
+    "C08.hiddenSerialization",
+    "C08.readableProjection",
+    "C08.visibleSerialization",
+    "C08.writableProjection",
+    "C23.firstOrCreate",
+    "C23.firstOrNew",
+    "C23.updateOrCreate",
+    "C24.batchAtomicity",
+    "C24.bulkDelete",
+    "C24.bulkEventDistinction",
+    "C24.bulkUpdate",
+    "C24.insert",
+    "C24.upsert",
+    "C25.decrement",
+    "C25.increment",
+    "C27.atomicFailure",
+    "C27.atomicGroup",
+    "C27.causalDependency",
+    "C28.associate",
+    "C28.dissociate",
+    "C41.attach",
+    "C41.detach",
+    "C41.relationRevision",
+    "C41.toggle",
+    "C41.updateExistingPivot",
+    "C43.relatedDelete",
+    "C43.relationCreate",
+    "C43.relationCreateMany",
+    "C43.relationSave",
+    "C43.relationSaveMany",
+    "C44.forceDeleteAuthorization",
+    "C44.onlyTrashed",
+    "C44.restore",
+    "C44.softDelete",
+    "C44.withTrashed",
+    "C46.globalScope",
+    "C46.localScopeRemote",
+    "C46.scopeInputValidation",
+    "C47.bulkBypassesInstanceEvents",
+    "C47.creatingCreated",
+    "C47.deletingDeleted",
+    "C47.observer",
+    "C47.updatingUpdated",
+    "C48.atLeastOnceControl",
+    "C48.commandAuthorization",
+    "C48.downstreamIdempotency",
+    "C48.durableEffect",
+    "C48.typedCommand",
+    "C49.lockForUpdate",
+    "C49.sharedLock",
+    "C50.registeredExpression",
+    "C50.registeredSqlFunction",
+    "C51.unmountCleanup"
+  ]
+}

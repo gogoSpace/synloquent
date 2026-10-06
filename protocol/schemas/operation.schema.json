@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://synloquent.local/protocol/1/operation.schema.json",
+  "type": "object",
+  "properties": {
+    "operationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "localIdentity": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "action": {
+      "enum": [
+        "create",
+        "update",
+        "delete",
+        "restore",
+        "forceDelete",
+        "increment",
+        "pivot"
+      ]
+    },
+    "values": {
+      "type": "object",
+      "maxProperties": 256,
+      "additionalProperties": {
+        "$ref": "value.schema.json"
+      }
+    },
+    "expectedRevision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "dependsOn": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1024
+      },
+      "maxItems": 1000
+    },
+    "atomicGroup": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "eventMode": {
+      "enum": ["instance", "bulk"]
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "operationId",
+    "model",
+    "localIdentity",
+    "action",
+    "values",
+    "dependsOn"
+  ]
+}

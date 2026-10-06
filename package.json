@@ -1,0 +1,32 @@
+{
+  "name": "synloquent-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/client"
+  ],
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "build": "npm run build --workspace @synloquent/client",
+    "typecheck": "npm run typecheck --workspace @synloquent/client",
+    "test": "npm run test --workspace @synloquent/client",
+    "lint": "eslint packages/client/src packages/client/tests scripts --no-warn-ignored",
+    "format:check": "prettier --check packages/client/src packages/client/tests protocol package.json packages/client/package.json tsconfig.json eslint.config.mjs",
+    "test:protocol": "tsx --test protocol/tests/*.test.ts",
+    "test:integration": "tsx --test scripts/integration.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.2.2",
+    "eslint": "10.11.0",
+    "prettier": "3.9.9",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.0",
+    "ajv": "8.20.0",
+    "@eslint/js": "10.0.1"
+  },
+  "type": "module"
+}

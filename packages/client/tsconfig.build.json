@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "types": ["react"],
+    "paths": {
+      "@op-engineering/op-sqlite": [
+        "../../examples/react-native/node_modules/@op-engineering/op-sqlite/lib/typescript/src/index.d.ts"
+      ]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/native-crypto", "src/react-native"]
+}

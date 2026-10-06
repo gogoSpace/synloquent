@@ -1,0 +1,82 @@
+{
+  "name": "@synloquent/client",
+  "version": "0.1.0",
+  "description": "Laravel-authored offline data and reliable synchronization for React Native",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "native/android/build.gradle",
+    "native/android/src/main",
+    "native/ios/SynloquentCrypto.h",
+    "native/ios/SynloquentCrypto.mm",
+    "SynloquentNativeCrypto.podspec",
+    "react-native.config.cjs",
+    "src/native-crypto/specs"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js"
+    },
+    "./sqlite": {
+      "types": "./dist/sqlite/index.d.ts",
+      "import": "./dist/sqlite/index.js"
+    },
+    "./native-crypto": {
+      "types": "./dist/native-crypto/index.d.ts",
+      "import": "./dist/native-crypto/index.js"
+    },
+    "./react-native": {
+      "types": "./dist/react-native/index.d.ts",
+      "import": "./dist/react-native/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && tsc -p tsconfig.native.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.native.json --noEmit",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "peerDependencies": {
+    "react": ">=19.0.0",
+    "@op-engineering/op-sqlite": "18.2.5",
+    "react-native": "0.87.1",
+    "scheduler": "0.27.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "@op-engineering/op-sqlite": {
+      "optional": true
+    },
+    "react-native": {
+      "optional": true
+    },
+    "scheduler": {
+      "optional": true
+    }
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "codegenConfig": {
+    "name": "SynloquentNativeSpec",
+    "type": "modules",
+    "jsSrcsDir": "src/native-crypto/specs",
+    "android": {
+      "javaPackageName": "com.synloquent.nativecrypto"
+    },
+    "ios": {
+      "modulesProvider": {
+        "NativeSynloquentCrypto": "SynloquentCrypto"
+      }
+    }
+  }
+}

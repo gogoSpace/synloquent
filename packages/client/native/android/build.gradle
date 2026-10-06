@@ -1,0 +1,26 @@
+apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'com.facebook.react'
+
+react {
+  jsRootDir = file('../..')
+  libraryName = 'SynloquentNativeSpec'
+  codegenJavaPackageName = 'com.synloquent.nativecrypto'
+}
+
+android {
+  namespace 'com.synloquent.nativecrypto'
+  compileSdk rootProject.ext.compileSdkVersion
+  defaultConfig {
+    minSdkVersion 24
+    targetSdkVersion rootProject.ext.targetSdkVersion
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+}
+
+dependencies {
+  implementation 'com.facebook.react:react-android'
+}

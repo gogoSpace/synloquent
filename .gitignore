@@ -1,0 +1,59 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.mobileprovision
+*.jks
+*.keystore
+!examples/react-native/android/app/debug.keystore
+
+# Dependencies and generated output
+node_modules/
+vendor/
+dist/
+build/
+coverage/
+Pods/
+DerivedData/
+.gradle/
+.cxx/
+.externalNativeBuild/
+.kotlin/
+xcuserdata/
+local.properties
+__pycache__/
+*.py[cod]
+.phpunit.cache/
+.phpunit.result.cache
+.phpstan.cache/
+.turbo/
+.expo/
+.next/
+
+# Local data, logs and developer output
+.local/
+*.log
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.db-shm
+*.db-wal
+examples/laravel/storage/
+examples/laravel/bootstrap/cache/
+
+# Local tooling instructions
+.agentic/
+AGENTS.md
+AGENTS.local.md
+CLAUDE.md
+.codex/
+.cursor/
+
+# Operating system files
+.DS_Store
+Thumbs.db

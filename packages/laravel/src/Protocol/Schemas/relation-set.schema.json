@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://synloquent.local/protocol/1/relation-set.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "model",
+    "relation",
+    "parentId",
+    "revision",
+    "completeness",
+    "targets"
+  ],
+  "properties": {
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "relation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "parentId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "completeness": {
+      "enum": ["complete", "partial"]
+    },
+    "targets": {
+      "type": "array",
+      "maxItems": 100000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "attributes"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "attributes": {
+            "type": "object",
+            "maxProperties": 256,
+            "additionalProperties": {
+              "$ref": "value.schema.json"
+            }
+          }
+        }
+      }
+    }
+  }
+}

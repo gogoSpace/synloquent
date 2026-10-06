@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://synloquent.local/protocol/1/query.schema.json",
+  "type": "object",
+  "properties": {
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "select": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1024
+      },
+      "maxItems": 256
+    },
+    "where": {
+      "$ref": "predicate.schema.json"
+    },
+    "orderBy": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "direction": {
+            "enum": ["asc", "desc"]
+          }
+        },
+        "additionalProperties": false,
+        "required": ["field", "direction"]
+      },
+      "maxItems": 16
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10000
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000000
+    },
+    "include": {
+      "type": "object",
+      "maxProperties": 64,
+      "additionalProperties": {
+        "$ref": "#"
+      }
+    },
+    "distinct": {
+      "type": "boolean"
+    },
+    "groupBy": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1024
+      },
+      "maxItems": 16
+    },
+    "having": {
+      "$ref": "predicate.schema.json"
+    },
+    "trashed": {
+      "enum": ["exclude", "include", "only"]
+    },
+    "aggregate": {
+      "type": "object",
+      "properties": {
+        "function": {
+          "enum": ["count", "min", "max", "sum", "avg"]
+        },
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      },
+      "additionalProperties": false,
+      "required": ["function"]
+    },
+    "scopes": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "arguments"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "arguments": {
+            "type": "object",
+            "maxProperties": 64,
+            "additionalProperties": {
+              "$ref": "value.schema.json"
+            }
+          }
+        }
+      }
+    },
+    "relationAggregates": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "relation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "function": {
+            "enum": ["count", "exists", "sum", "min", "max", "avg"]
+          },
+          "field": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "alias": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "required": ["relation", "function"]
+      }
+    },
+    "joins": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "enum": ["inner", "left"]
+          },
+          "model": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "alias": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "on": {
+            "type": "array",
+            "maxItems": 16,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1024
+                },
+                "otherField": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1024
+                }
+              },
+              "required": ["field", "otherField"]
+            }
+          }
+        },
+        "required": ["type", "model", "alias", "on"]
+      }
+    },
+    "joinedWhere": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "alias": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "predicate": {
+            "$ref": "predicate.schema.json"
+          }
+        },
+        "required": ["alias", "predicate"]
+      }
+    },
+    "subqueries": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": ["select", "exists", "notExists", "where"]
+          },
+          "query": {
+            "$ref": "#"
+          },
+          "alias": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "field": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "operator": {
+            "enum": ["=", "!=", "<", "<=", ">", ">="]
+          },
+          "correlate": {
+            "type": "array",
+            "maxItems": 16,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "innerField": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1024
+                },
+                "outerField": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1024
+                }
+              },
+              "required": ["innerField", "outerField"]
+            }
+          }
+        },
+        "required": ["kind", "query"]
+      }
+    },
+    "unions": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "all": {
+            "type": "boolean"
+          },
+          "query": {
+            "$ref": "#"
+          }
+        },
+        "required": ["all", "query"]
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": ["model"]
+}

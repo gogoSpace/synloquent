@@ -1,0 +1,35 @@
+{
+  "name": "synloquent-example",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "bundle:ios": "react-native bundle --entry-file index.js --platform ios --dev false --bundle-output build/main.jsbundle",
+    "bundle:android": "react-native bundle --entry-file index.js --platform android --dev false --bundle-output build/index.android.bundle",
+    "postinstall": "node ../../scripts/repair_rn_types.mjs",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@op-engineering/op-sqlite": "18.2.5",
+    "@synloquent/client": "file:../../artifacts/packages/synloquent-client-0.1.0-eaa8a74731c5329a.tgz",
+    "react": "19.2.8",
+    "react-native": "0.87.1",
+    "react-native-get-random-values": "2.0.0",
+    "scheduler": "0.27.0"
+  },
+  "devDependencies": {
+    "@babel/core": "7.29.7",
+    "@babel/preset-env": "7.29.5",
+    "@babel/runtime": "7.29.7",
+    "@react-native-community/cli": "20.2.0",
+    "@react-native-community/cli-platform-android": "20.2.0",
+    "@react-native-community/cli-platform-ios": "20.2.0",
+    "@react-native/babel-preset": "0.87.1",
+    "@react-native/metro-config": "0.87.1"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  }
+}

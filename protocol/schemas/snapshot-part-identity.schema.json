@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://synloquent.local/protocol/1/snapshot-part-identity.schema.json",
+  "type": "object",
+  "properties": {
+    "ordinal": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 599999
+    },
+    "downloadUrl": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "byteSize": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65536
+    },
+    "continuation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    }
+  },
+  "required": ["ordinal", "downloadUrl", "hash", "byteSize", "continuation"],
+  "additionalProperties": false
+}

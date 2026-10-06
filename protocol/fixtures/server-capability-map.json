@@ -1,0 +1,662 @@
+{
+  "version": 1,
+  "methods": {
+    "C01.customKey": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Registered UUID, ULID and custom nonincrementing string resources.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_materialized_custom_cast_enum_date_float_and_string_identities"
+      }
+    },
+    "C01.integerKey": {
+      "publicApi": "MutationAction.execute and QueryAction.execute",
+      "limits": "Integer canonical IDs, partition-bound local aliases and registered FK references.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_integer_parent_child_aliases_replay_and_query_relations"
+      }
+    },
+    "C01.localIdentity": {
+      "publicApi": "MutationAction.execute and QueryAction.execute",
+      "limits": "Integer canonical IDs, partition-bound local aliases and registered FK references.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_integer_parent_child_aliases_replay_and_query_relations"
+      }
+    },
+    "C01.stringKey": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Registered UUID, ULID and custom nonincrementing string resources.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_materialized_custom_cast_enum_date_float_and_string_identities"
+      }
+    },
+    "C01.ulid": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Registered UUID, ULID and custom nonincrementing string resources.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_materialized_custom_cast_enum_date_float_and_string_identities"
+      }
+    },
+    "C01.uuid": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Registered UUID, ULID and custom nonincrementing string resources.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_materialized_custom_cast_enum_date_float_and_string_identities"
+      }
+    },
+    "C05.defaults": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Host model casts and defaults. Empty timestamped update invokes Eloquent touch. UTC instants and decimal strings.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_standard_casts_defaults_and_timestamps_have_canonical_wire_types"
+      }
+    },
+    "C05.nonIncrementingKey": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Registered UUID, ULID and custom nonincrementing string resources.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_materialized_custom_cast_enum_date_float_and_string_identities"
+      }
+    },
+    "C05.timestamps": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Host model casts and defaults. Empty timestamped update invokes Eloquent touch. UTC instants and decimal strings.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_standard_casts_defaults_and_timestamps_have_canonical_wire_types"
+      }
+    },
+    "C05.touch": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Host model casts and defaults. Empty timestamped update invokes Eloquent touch. UTC instants and decimal strings.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_standard_casts_defaults_and_timestamps_have_canonical_wire_types"
+      }
+    },
+    "C06.booleanCast": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Host model casts and defaults. Empty timestamped update invokes Eloquent touch. UTC instants and decimal strings.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_standard_casts_defaults_and_timestamps_have_canonical_wire_types"
+      }
+    },
+    "C06.dateCast": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Host model casts and defaults. Empty timestamped update invokes Eloquent touch. UTC instants and decimal strings.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_standard_casts_defaults_and_timestamps_have_canonical_wire_types"
+      }
+    },
+    "C06.datetimeCast": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Host model casts and defaults. Empty timestamped update invokes Eloquent touch. UTC instants and decimal strings.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_standard_casts_defaults_and_timestamps_have_canonical_wire_types"
+      }
+    },
+    "C06.decimalCast": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Host model casts and defaults. Empty timestamped update invokes Eloquent touch. UTC instants and decimal strings.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_standard_casts_defaults_and_timestamps_have_canonical_wire_types"
+      }
+    },
+    "C06.enumCast": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Host model casts and defaults. Empty timestamped update invokes Eloquent touch. UTC instants and decimal strings.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_standard_casts_defaults_and_timestamps_have_canonical_wire_types"
+      }
+    },
+    "C06.floatPrecision": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Host model casts and defaults. Empty timestamped update invokes Eloquent touch. UTC instants and decimal strings.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_standard_casts_defaults_and_timestamps_have_canonical_wire_types"
+      }
+    },
+    "C06.integerCast": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Host model casts and defaults. Empty timestamped update invokes Eloquent touch. UTC instants and decimal strings.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_standard_casts_defaults_and_timestamps_have_canonical_wire_types"
+      }
+    },
+    "C06.jsonCast": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Host model casts and defaults. Empty timestamped update invokes Eloquent touch. UTC instants and decimal strings.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_standard_casts_defaults_and_timestamps_have_canonical_wire_types"
+      }
+    },
+    "C06.stringCast": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Host model casts and defaults. Empty timestamped update invokes Eloquent touch. UTC instants and decimal strings.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_standard_casts_defaults_and_timestamps_have_canonical_wire_types"
+      }
+    },
+    "C07.accessor": {
+      "publicApi": "MutationAction.execute and ManifestBuilder.build",
+      "limits": "Explicit read-only materialized PHP fields. SQL predicates over nonphysical fields reject. Offline PHP execution is outside this witness.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_materialized_custom_cast_enum_date_float_and_string_identities"
+      }
+    },
+    "C07.customCast": {
+      "publicApi": "MutationAction.execute and ManifestBuilder.build",
+      "limits": "Explicit read-only materialized PHP fields. SQL predicates over nonphysical fields reject. Offline PHP execution is outside this witness.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_materialized_custom_cast_enum_date_float_and_string_identities"
+      }
+    },
+    "C07.materializedAppend": {
+      "publicApi": "MutationAction.execute and ManifestBuilder.build",
+      "limits": "Explicit read-only materialized PHP fields. SQL predicates over nonphysical fields reject. Offline PHP execution is outside this witness.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_materialized_custom_cast_enum_date_float_and_string_identities"
+      }
+    },
+    "C23.uniquenessConflict": {
+      "publicApi": "MutationAction.execute",
+      "limits": "A bounded atomicGroup rolls back rows, revisions, aliases and publications after actual PostgreSQL unique violation 23505.",
+      "remote": {
+        "source": "packages/laravel/tests/RecoveryTest.php",
+        "testcase": "test_atomic_failure_rolls_back_domain_revision_publication_and_alias"
+      }
+    },
+    "C24.batchAtomicity": {
+      "publicApi": "MutationAction.execute",
+      "limits": "A bounded atomicGroup rolls back rows, revisions, aliases and publications after actual PostgreSQL unique violation 23505.",
+      "remote": {
+        "source": "packages/laravel/tests/RecoveryTest.php",
+        "testcase": "test_atomic_failure_rolls_back_domain_revision_publication_and_alias"
+      }
+    },
+    "C24.bulkEventDistinction": {
+      "publicApi": "MutationAction.execute with instance or bulk eventMode",
+      "limits": "Actual saving/creating/created/saved/updating/updated/deleting/deleted callbacks. Bulk writes preserve casts and capture without instance callbacks.",
+      "remote": {
+        "source": "packages/laravel/tests/RecoveryTest.php",
+        "testcase": "test_instance_observers_fire_in_order_and_bulk_writes_bypass_them"
+      }
+    },
+    "C25.atomicDeltaConflict": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Revision-bound integer deltas. A stale decrement conflicts and retains current canonical quantity.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_revision_bound_increment_and_decrement_reject_stale_deltas"
+      }
+    },
+    "C25.decrement": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Revision-bound integer deltas. A stale decrement conflicts and retains current canonical quantity.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_revision_bound_increment_and_decrement_reject_stale_deltas"
+      }
+    },
+    "C25.increment": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Revision-bound integer deltas. A stale decrement conflicts and retains current canonical quantity.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_revision_bound_increment_and_decrement_reject_stale_deltas"
+      }
+    },
+    "C27.atomicFailure": {
+      "publicApi": "MutationAction.execute",
+      "limits": "A bounded atomicGroup rolls back rows, revisions, aliases and publications after actual PostgreSQL unique violation 23505.",
+      "remote": {
+        "source": "packages/laravel/tests/RecoveryTest.php",
+        "testcase": "test_atomic_failure_rolls_back_domain_revision_publication_and_alias"
+      }
+    },
+    "C27.atomicGroup": {
+      "publicApi": "MutationAction.execute",
+      "limits": "A bounded atomicGroup rolls back rows, revisions, aliases and publications after actual PostgreSQL unique violation 23505.",
+      "remote": {
+        "source": "packages/laravel/tests/RecoveryTest.php",
+        "testcase": "test_atomic_failure_rolls_back_domain_revision_publication_and_alias"
+      }
+    },
+    "C27.causalDependency": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Tagged FK and pivot aliases require their recorded creation operation in dependsOn. Actor/device/epoch partition is enforced.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_tagged_foreign_and_pivot_references_require_creation_dependencies"
+      }
+    },
+    "C29.customForeignKey": {
+      "publicApi": "ManifestBuilder.build and QueryAction.execute",
+      "limits": "Real PostgreSQL custom foreign and distinct local keys. Actual Eloquent ordered oneOfMany aggregates include identity tie behavior.",
+      "remote": {
+        "source": "packages/laravel/tests/RelationConformanceTest.php",
+        "testcase": "test_custom_primary_foreign_and_pivot_keys_and_ordered_one_of_many_ties"
+      }
+    },
+    "C29.customLocalKey": {
+      "publicApi": "ManifestBuilder.build and QueryAction.execute",
+      "limits": "Real PostgreSQL custom foreign and distinct local keys. Actual Eloquent ordered oneOfMany aggregates include identity tie behavior.",
+      "remote": {
+        "source": "packages/laravel/tests/RelationConformanceTest.php",
+        "testcase": "test_custom_primary_foreign_and_pivot_keys_and_ordered_one_of_many_ties"
+      }
+    },
+    "C34.deterministicTie": {
+      "publicApi": "ManifestBuilder.build and QueryAction.execute",
+      "limits": "Real PostgreSQL custom foreign and distinct local keys. Actual Eloquent ordered oneOfMany aggregates include identity tie behavior.",
+      "remote": {
+        "source": "packages/laravel/tests/RelationConformanceTest.php",
+        "testcase": "test_custom_primary_foreign_and_pivot_keys_and_ordered_one_of_many_ties"
+      }
+    },
+    "C34.latestOfMany": {
+      "publicApi": "ManifestBuilder.build and QueryAction.execute",
+      "limits": "Real PostgreSQL custom foreign and distinct local keys. Actual Eloquent ordered oneOfMany aggregates include identity tie behavior.",
+      "remote": {
+        "source": "packages/laravel/tests/RelationConformanceTest.php",
+        "testcase": "test_custom_primary_foreign_and_pivot_keys_and_ordered_one_of_many_ties"
+      }
+    },
+    "C34.ofMany": {
+      "publicApi": "ManifestBuilder.build and QueryAction.execute",
+      "limits": "Real PostgreSQL custom foreign and distinct local keys. Actual Eloquent ordered oneOfMany aggregates include identity tie behavior.",
+      "remote": {
+        "source": "packages/laravel/tests/RelationConformanceTest.php",
+        "testcase": "test_custom_primary_foreign_and_pivot_keys_and_ordered_one_of_many_ties"
+      }
+    },
+    "C34.oldestOfMany": {
+      "publicApi": "ManifestBuilder.build and QueryAction.execute",
+      "limits": "Real PostgreSQL custom foreign and distinct local keys. Actual Eloquent ordered oneOfMany aggregates include identity tie behavior.",
+      "remote": {
+        "source": "packages/laravel/tests/RelationConformanceTest.php",
+        "testcase": "test_custom_primary_foreign_and_pivot_keys_and_ordered_one_of_many_ties"
+      }
+    },
+    "C40.pivotAttributes": {
+      "publicApi": "MutationAction.execute and PullAction.execute",
+      "limits": "Explicit exported integer pivot position, receipt membership promotion, inverse sets and stale relation conflict.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_pivot_mutation_receipt_snapshot_pull_and_relation_conflict"
+      }
+    },
+    "C40.pivotCast": {
+      "publicApi": "MutationAction.execute and PullAction.execute",
+      "limits": "Explicit exported integer pivot position, receipt membership promotion, inverse sets and stale relation conflict.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_pivot_mutation_receipt_snapshot_pull_and_relation_conflict"
+      }
+    },
+    "C41.attach": {
+      "publicApi": "MutationAction.execute and PullAction.execute",
+      "limits": "Explicit exported integer pivot position, receipt membership promotion, inverse sets and stale relation conflict.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_pivot_mutation_receipt_snapshot_pull_and_relation_conflict"
+      }
+    },
+    "C41.detach": {
+      "publicApi": "MutationAction.execute and PullAction.execute",
+      "limits": "Explicit exported integer pivot position, receipt membership promotion, inverse sets and stale relation conflict.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_pivot_mutation_receipt_snapshot_pull_and_relation_conflict"
+      }
+    },
+    "C41.relationRevision": {
+      "publicApi": "MutationAction.execute and PullAction.execute",
+      "limits": "Explicit exported integer pivot position, receipt membership promotion, inverse sets and stale relation conflict.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_pivot_mutation_receipt_snapshot_pull_and_relation_conflict"
+      }
+    },
+    "C41.toggle": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Complete authorized set and matching directed relation revision required for destructive sync. Hidden memberships survive. Atomic membership is bounded.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_complete_sync_and_other_pivot_actions_preserve_hidden_memberships"
+      }
+    },
+    "C41.updateExistingPivot": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Complete authorized set and matching directed relation revision required for destructive sync. Hidden memberships survive. Atomic membership is bounded.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_complete_sync_and_other_pivot_actions_preserve_hidden_memberships"
+      }
+    },
+    "C42.completeSetGuard": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Complete authorized set and matching directed relation revision required for destructive sync. Hidden memberships survive. Atomic membership is bounded.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_complete_sync_and_other_pivot_actions_preserve_hidden_memberships"
+      }
+    },
+    "C42.staleRevisionConflict": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Complete authorized set and matching directed relation revision required for destructive sync. Hidden memberships survive. Atomic membership is bounded.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_complete_sync_and_other_pivot_actions_preserve_hidden_memberships"
+      }
+    },
+    "C42.sync": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Complete authorized set and matching directed relation revision required for destructive sync. Hidden memberships survive. Atomic membership is bounded.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_complete_sync_and_other_pivot_actions_preserve_hidden_memberships"
+      }
+    },
+    "C42.syncWithoutDetaching": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Complete authorized set and matching directed relation revision required for destructive sync. Hidden memberships survive. Atomic membership is bounded.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_complete_sync_and_other_pivot_actions_preserve_hidden_memberships"
+      }
+    },
+    "C46.globalScope": {
+      "publicApi": "QueryAction.execute and MutationAction.execute",
+      "limits": "Actual Eloquent global scope constrains read and mutation paths. Scopes remain host PHP and are remotely executed.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_eloquent_global_scope_and_unregistered_sql_fail_closed"
+      }
+    },
+    "C46.localScopeRemote": {
+      "publicApi": "QueryAction.execute with registered scopes",
+      "limits": "Typed registered activePriced scope uses bound input under resource policy.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_remote_aggregate_group_having_registered_scope_and_command"
+      }
+    },
+    "C46.scopeInputValidation": {
+      "publicApi": "CommandAction.execute and QueryAction.execute",
+      "limits": "Unknown scope inputs, invalid typed command arguments, denied actor and invalid handler result roll back without effects.",
+      "remote": {
+        "source": "packages/laravel/tests/AuthorizationTest.php",
+        "testcase": "test_registered_command_and_scope_argument_authorization_and_result_validation"
+      }
+    },
+    "C47.bulkBypassesInstanceEvents": {
+      "publicApi": "MutationAction.execute with instance or bulk eventMode",
+      "limits": "Actual saving/creating/created/saved/updating/updated/deleting/deleted callbacks. Bulk writes preserve casts and capture without instance callbacks.",
+      "remote": {
+        "source": "packages/laravel/tests/RecoveryTest.php",
+        "testcase": "test_instance_observers_fire_in_order_and_bulk_writes_bypass_them"
+      }
+    },
+    "C47.creatingCreated": {
+      "publicApi": "MutationAction.execute with instance or bulk eventMode",
+      "limits": "Actual saving/creating/created/saved/updating/updated/deleting/deleted callbacks. Bulk writes preserve casts and capture without instance callbacks.",
+      "remote": {
+        "source": "packages/laravel/tests/RecoveryTest.php",
+        "testcase": "test_instance_observers_fire_in_order_and_bulk_writes_bypass_them"
+      }
+    },
+    "C47.deletingDeleted": {
+      "publicApi": "MutationAction.execute with instance or bulk eventMode",
+      "limits": "Actual saving/creating/created/saved/updating/updated/deleting/deleted callbacks. Bulk writes preserve casts and capture without instance callbacks.",
+      "remote": {
+        "source": "packages/laravel/tests/RecoveryTest.php",
+        "testcase": "test_instance_observers_fire_in_order_and_bulk_writes_bypass_them"
+      }
+    },
+    "C47.observer": {
+      "publicApi": "MutationAction.execute with instance or bulk eventMode",
+      "limits": "Actual saving/creating/created/saved/updating/updated/deleting/deleted callbacks. Bulk writes preserve casts and capture without instance callbacks.",
+      "remote": {
+        "source": "packages/laravel/tests/RecoveryTest.php",
+        "testcase": "test_instance_observers_fire_in_order_and_bulk_writes_bypass_them"
+      }
+    },
+    "C47.updatingUpdated": {
+      "publicApi": "MutationAction.execute with instance or bulk eventMode",
+      "limits": "Actual saving/creating/created/saved/updating/updated/deleting/deleted callbacks. Bulk writes preserve casts and capture without instance callbacks.",
+      "remote": {
+        "source": "packages/laravel/tests/RecoveryTest.php",
+        "testcase": "test_instance_observers_fire_in_order_and_bulk_writes_bypass_them"
+      }
+    },
+    "C48.atLeastOnceControl": {
+      "publicApi": "EffectDelivery.deliverOne",
+      "limits": "Explicit nonidempotent control visibly delivers twice after crash and retry. No exactly-once claim.",
+      "remote": {
+        "source": "packages/laravel/tests/RecoveryTest.php",
+        "testcase": "test_non_idempotent_destination_explicitly_has_at_least_once_delivery"
+      }
+    },
+    "C48.commandAuthorization": {
+      "publicApi": "CommandAction.execute and QueryAction.execute",
+      "limits": "Unknown scope inputs, invalid typed command arguments, denied actor and invalid handler result roll back without effects.",
+      "remote": {
+        "source": "packages/laravel/tests/AuthorizationTest.php",
+        "testcase": "test_registered_command_and_scope_argument_authorization_and_result_validation"
+      }
+    },
+    "C48.commandLostResponse": {
+      "publicApi": "CommandAction.execute increaseQuantity",
+      "limits": "Independent process commits the command and exits without response. Exact retry replays one receipt, one durable effect and unchanged quantity.",
+      "remote": {
+        "source": "packages/laravel/tests/RecoveryTest.php",
+        "testcase": "test_command_process_exits_after_commit_without_response_and_replays_one_effect"
+      }
+    },
+    "C48.downstreamIdempotency": {
+      "publicApi": "EffectDelivery.deliverOne",
+      "limits": "Actual independent worker dies after downstream commit before acknowledgement. Same key yields one downstream effect across two attempts.",
+      "remote": {
+        "source": "packages/laravel/tests/RecoveryTest.php",
+        "testcase": "test_external_success_then_worker_death_uses_downstream_idempotency"
+      }
+    },
+    "C48.durableEffect": {
+      "publicApi": "CommandAction.execute increaseQuantity",
+      "limits": "Immutable command operation identity replay leaves quantity unchanged and persists exactly one external intent.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_remote_aggregate_group_having_registered_scope_and_command"
+      }
+    },
+    "C48.typedCommand": {
+      "publicApi": "CommandAction.execute increaseQuantity",
+      "limits": "Immutable command operation identity replay leaves quantity unchanged and persists exactly one external intent.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_remote_aggregate_group_having_registered_scope_and_command"
+      }
+    },
+    "C49.lockForUpdate": {
+      "publicApi": "CommandAction.execute inspectItemLocked",
+      "limits": "Registered typed handler executes actual PostgreSQL FOR UPDATE and FOR SHARE within gateway lock order.",
+      "remote": {
+        "source": "packages/laravel/tests/RecoveryTest.php",
+        "testcase": "test_registered_update_and_shared_locks_execute_inside_the_gateway"
+      }
+    },
+    "C49.sharedLock": {
+      "publicApi": "CommandAction.execute inspectItemLocked",
+      "limits": "Registered typed handler executes actual PostgreSQL FOR UPDATE and FOR SHARE within gateway lock order.",
+      "remote": {
+        "source": "packages/laravel/tests/RecoveryTest.php",
+        "testcase": "test_registered_update_and_shared_locks_execute_inside_the_gateway"
+      }
+    },
+    "C50.registeredExpression": {
+      "publicApi": "QueryAction.execute metadataContains registered scope",
+      "limits": "Actual PostgreSQL JSONB containment expression uses bound typed JSON input. Undeclared expression arguments reject and injected literal text never enters SQL.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_registered_expression_binds_jsonb_operator_and_rejects_input_smuggling"
+      }
+    },
+    "C50.registeredSqlFunction": {
+      "publicApi": "QueryAction.execute metadataContains scope",
+      "limits": "Registered authorized PostgreSQL JSON containment through host Eloquent whereJsonContains. Arbitrary SQL remains unavailable.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_json_scalar_subset_and_registered_remote_object_scope"
+      }
+    },
+    "C50.unsupportedUnregisteredSql": {
+      "publicApi": "QueryAction.execute",
+      "limits": "Unregistered SQL scope and injected field identifier reject before SQL execution.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_eloquent_global_scope_and_unregistered_sql_fail_closed"
+      }
+    },
+    "C52.authorizationGeneration": {
+      "publicApi": "PullAction.execute",
+      "limits": "Same stream sequence with changed trusted authorization generation rechecks fields and resource access. Record removal updates membership.",
+      "remote": {
+        "source": "packages/laravel/tests/IncrementalPullTest.php",
+        "testcase": "test_changed_authorization_generation_rechecks_fields_and_resource_policy_at_same_sequence"
+      }
+    },
+    "C52.partialDataset": {
+      "publicApi": "QueryAction.execute and SnapshotAction.execute",
+      "limits": "Bounded remote query reports partial query scope. Full catalog snapshot reports complete scope. Client aggregation guards require separate composed proof.",
+      "remote": {
+        "source": "packages/laravel/tests/ConformanceTest.php",
+        "testcase": "test_query_partial_scope_and_snapshot_complete_scope_are_explicit"
+      }
+    },
+    "C52.subscriptionMembership": {
+      "publicApi": "PullAction.execute",
+      "limits": "Same stream sequence with changed trusted authorization generation rechecks fields and resource access. Record removal updates membership.",
+      "remote": {
+        "source": "packages/laravel/tests/IncrementalPullTest.php",
+        "testcase": "test_changed_authorization_generation_rechecks_fields_and_resource_policy_at_same_sequence"
+      }
+    },
+    "C53.rejected": {
+      "publicApi": "MutationAction.execute",
+      "limits": "Forbidden writable field yields durable rejected receipt and no domain write. Client status transitions are outside this witness.",
+      "remote": {
+        "source": "packages/laravel/tests/AuthorizationTest.php",
+        "testcase": "test_forbidden_fields_and_unknown_exports_fail_closed"
+      }
+    },
+    "C55.download": {
+      "publicApi": "SnapshotAction.execute and authenticated download route",
+      "limits": "Immutable generation plus content digest, actor grant, current reauthorization and corruption rejection. Inline and download bodies share canonical content.",
+      "remote": {
+        "source": "packages/laravel/tests/SnapshotTest.php",
+        "testcase": "test_authenticated_immutable_http_download_reauthorizes_and_detects_corruption"
+      }
+    },
+    "C55.retentionResnapshot": {
+      "publicApi": "PullAction.execute and PullAction.prune",
+      "limits": "Cursor below durable retention floor rejects with cursor_expired after real cascade and empty retained journal.",
+      "remote": {
+        "source": "packages/laravel/tests/SnapshotTest.php",
+        "testcase": "test_delete_and_database_cascade_emit_tombstones_and_preserve_retention_floor"
+      }
+    },
+    "C55.snapshot": {
+      "publicApi": "SnapshotAction.execute and authenticated download route",
+      "limits": "Immutable generation plus content digest, actor grant, current reauthorization and corruption rejection. Inline and download bodies share canonical content.",
+      "remote": {
+        "source": "packages/laravel/tests/SnapshotTest.php",
+        "testcase": "test_authenticated_immutable_http_download_reauthorizes_and_detects_corruption"
+      }
+    },
+    "C56.accountPartition": {
+      "publicApi": "SnapshotAction.execute",
+      "limits": "Snapshot alias data is exposed only to its authenticated actor/device/epoch partition. Client late-session response handling requires separate proof.",
+      "remote": {
+        "source": "packages/laravel/tests/SnapshotTest.php",
+        "testcase": "test_snapshot_aliases_are_bound_to_actor_device_and_epoch"
+      }
+    },
+    "C56.devicePartition": {
+      "publicApi": "SnapshotAction.execute",
+      "limits": "Snapshot alias data is exposed only to its authenticated actor/device/epoch partition. Client late-session response handling requires separate proof.",
+      "remote": {
+        "source": "packages/laravel/tests/SnapshotTest.php",
+        "testcase": "test_snapshot_aliases_are_bound_to_actor_device_and_epoch"
+      }
+    },
+    "C56.epochSeparation": {
+      "publicApi": "SnapshotAction.execute",
+      "limits": "Snapshot alias data is exposed only to its authenticated actor/device/epoch partition. Client late-session response handling requires separate proof.",
+      "remote": {
+        "source": "packages/laravel/tests/SnapshotTest.php",
+        "testcase": "test_snapshot_aliases_are_bound_to_actor_device_and_epoch"
+      }
+    },
+    "C58.capturedRelationChanges": {
+      "publicApi": "WriteContext.capture and PullAction.execute",
+      "limits": "Registry-wide incoming relation discovery handles one-way exports. Scoped pivot memberships clear on revoke and return on regain.",
+      "remote": {
+        "source": "packages/laravel/tests/IncrementalPullTest.php",
+        "testcase": "test_one_way_pivot_export_revoke_and_regain_capture_incoming_owners"
+      }
+    },
+    "C58.cascadeDelete": {
+      "publicApi": "MutationAction.execute and PullAction.execute",
+      "limits": "Real PostgreSQL FK cascade emits parent and child tombstones. Registered deletion dependency capture is bounded.",
+      "remote": {
+        "source": "packages/laravel/tests/SnapshotTest.php",
+        "testcase": "test_delete_and_database_cascade_emit_tombstones_and_preserve_retention_floor"
+      }
+    },
+    "C58.nullifyDelete": {
+      "publicApi": "MutationAction.execute and PullAction.execute",
+      "limits": "Actual PostgreSQL restrict error rolls back. Nullify updates canonical fields and advances every affected registered record revision.",
+      "remote": {
+        "source": "packages/laravel/tests/SnapshotTest.php",
+        "testcase": "test_database_restrict_and_nullify_are_captured_or_conservatively_materialized"
+      }
+    },
+    "C58.restrictDelete": {
+      "publicApi": "MutationAction.execute and PullAction.execute",
+      "limits": "Actual PostgreSQL restrict error rolls back. Nullify updates canonical fields and advances every affected registered record revision.",
+      "remote": {
+        "source": "packages/laravel/tests/SnapshotTest.php",
+        "testcase": "test_database_restrict_and_nullify_are_captured_or_conservatively_materialized"
+      }
+    }
+  },
+  "unmappedRemoteAfterExistingIntegration": [
+    "C51.unmountCleanup",
+    "C54.offlineBoot",
+    "C54.compatibleOnlineManifest",
+    "C54.cachedManifest",
+    "C54.unknownCapabilityGuard",
+    "C55.schemaBackfill",
+    "C58.pendingDependencyDelete"
+  ]
+}

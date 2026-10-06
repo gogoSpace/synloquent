@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://synloquent.local/protocol/1/pull.schema.json",
+  "type": "object",
+  "properties": {
+    "batches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cursor": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "enum": ["upsert", "delete", "remove"]
+                },
+                "model": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1024
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1024
+                },
+                "record": {
+                  "$ref": "record.schema.json"
+                }
+              },
+              "additionalProperties": false,
+              "required": ["kind", "model", "id"]
+            },
+            "maxItems": 10000
+          },
+          "relationSets": {
+            "type": "array",
+            "maxItems": 100000,
+            "items": {
+              "$ref": "relation-set.schema.json"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": ["cursor", "changes", "relationSets"]
+      },
+      "maxItems": 1000
+    },
+    "cursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "highWater": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "scanComplete": {
+      "type": "boolean"
+    },
+    "scope": {
+      "$ref": "scope.schema.json"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["batches", "cursor", "highWater", "scanComplete", "scope"]
+}

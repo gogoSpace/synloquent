@@ -1,0 +1,14 @@
+{
+  "types_generated/Libraries/Animated/nodes/AnimatedProps.d.ts": {
+    "original": "0dde4c5442c332f01cb8f830ead7965b64996dca6b9bcc3a280806f48b8d3f21",
+    "repaired": "1deb7301ccf54a5cdf30a25e79214a6bdfa9b33081bd1dc8a02b82f35d6fda90"
+  },
+  "types_generated/Libraries/Lists/VirtualizedList.d.ts": {
+    "original": "90335722e3f37fbca6dc2dc699efac7ebf2f8866a9cfddce21a3dd6bb9e9a92a",
+    "repaired": "51500c381dc135aba8268f7af110fb2cc657a0db9c823ec8555f0b9231de0272"
+  },
+  "types_generated/src/private/webapis/dom/nodes/ReadOnlyNode.d.ts": {
+    "original": "b0599260380ad18e7b783d712990bdf0cfba1346719bb8273fbaf06ed5a61bae",
+    "repaired": "9f09899132976f3110b403314e07e1a0157459e9f2194259df42094e4114dbaf"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "types": ["react"],
+    "paths": {
+      "react-native": [
+        "../../examples/react-native/node_modules/react-native/types_generated/index.d.ts"
+      ],
+      "@op-engineering/op-sqlite": [
+        "../../examples/react-native/node_modules/@op-engineering/op-sqlite/lib/typescript/src/index.d.ts"
+      ]
+    }
+  },
+  "include": ["src/native-crypto/**/*.ts", "src/react-native/**/*.ts"]
+}

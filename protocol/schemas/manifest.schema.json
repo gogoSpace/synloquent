@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://synloquent.local/protocol/1/manifest.schema.json",
+  "type": "object",
+  "properties": {
+    "protocolVersion": {
+      "const": 1
+    },
+    "releaseVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "schemaVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1024
+      },
+      "maxItems": 256
+    },
+    "models": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 256,
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "resource": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "table": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "primaryKey": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "keyType": {
+            "enum": ["integer", "string"]
+          },
+          "incrementing": {
+            "type": "boolean"
+          },
+          "fields": {
+            "type": "object",
+            "minProperties": 1,
+            "maxProperties": 256,
+            "additionalProperties": {
+              "$ref": "field.schema.json"
+            }
+          },
+          "relations": {
+            "type": "object",
+            "maxProperties": 64,
+            "additionalProperties": {
+              "$ref": "relation.schema.json"
+            }
+          },
+          "operations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            },
+            "maxItems": 32
+          },
+          "timestamps": {
+            "type": "object",
+            "properties": {
+              "createdAt": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              "updatedAt": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              }
+            },
+            "additionalProperties": false,
+            "required": ["createdAt", "updatedAt"]
+          },
+          "softDeletes": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "unique": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              "maxItems": 16
+            },
+            "maxItems": 64
+          },
+          "indexes": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              "maxItems": 16
+            },
+            "maxItems": 64
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "resource",
+          "table",
+          "primaryKey",
+          "keyType",
+          "incrementing",
+          "fields",
+          "relations",
+          "operations"
+        ]
+      }
+    },
+    "commands": {
+      "type": "object",
+      "maxProperties": 128,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["arguments", "result"],
+        "properties": {
+          "arguments": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "field.schema.json"
+            }
+          },
+          "result": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "field.schema.json"
+            }
+          }
+        }
+      }
+    },
+    "scopes": {
+      "type": "object",
+      "maxProperties": 128,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["model", "arguments"],
+        "properties": {
+          "model": {
+            "type": "string",
+            "minLength": 1
+          },
+          "arguments": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "field.schema.json"
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "protocolVersion",
+    "releaseVersion",
+    "schemaVersion",
+    "fingerprint",
+    "capabilities",
+    "models"
+  ]
+}

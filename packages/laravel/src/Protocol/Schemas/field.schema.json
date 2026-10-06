@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://synloquent.local/protocol/1/field.schema.json",
+  "type": "object",
+  "properties": {
+    "type": {
+      "enum": [
+        "string",
+        "integer",
+        "float",
+        "decimal",
+        "boolean",
+        "date",
+        "datetime",
+        "json",
+        "enum"
+      ]
+    },
+    "nullable": {
+      "type": "boolean"
+    },
+    "readable": {
+      "type": "boolean"
+    },
+    "writable": {
+      "type": "boolean"
+    },
+    "default": {
+      "$ref": "value.schema.json"
+    },
+    "enum": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 1000
+    },
+    "precision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 30
+    },
+    "materialized": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "required": ["type", "nullable", "readable", "writable"]
+}

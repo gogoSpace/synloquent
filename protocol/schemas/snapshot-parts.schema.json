@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://synloquent.local/protocol/1/snapshot-parts.schema.json",
+  "type": "object",
+  "properties": {
+    "schemaFingerprint": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "dataset": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "generation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "cursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "byteSize": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 536870912
+    },
+    "scope": {
+      "$ref": "scope.schema.json"
+    },
+    "downloadUrl": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "format": {
+      "const": "canonical-parts-v1"
+    },
+    "status": {
+      "enum": ["ready", "admission-required"]
+    },
+    "partCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 600000
+    },
+    "recordCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 500000
+    },
+    "relationSetCount": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100000
+    },
+    "maximumPartBytes": {
+      "const": 65536
+    },
+    "maximumRowBytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "partRowLimit": {
+      "const": 256
+    },
+    "firstPart": {
+      "type": "object",
+      "properties": {
+        "ordinal": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 599999
+        },
+        "downloadUrl": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "byteSize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536
+        },
+        "continuation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "ordinal",
+        "downloadUrl",
+        "hash",
+        "byteSize",
+        "continuation"
+      ],
+      "additionalProperties": false
+    },
+    "confirmationToken": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "reason": {
+      "enum": ["unsupported-host-contract", "row-exceeds-part-budget"]
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "schemaFingerprint",
+    "dataset",
+    "generation",
+    "cursor",
+    "hash",
+    "byteSize",
+    "scope",
+    "format",
+    "status",
+    "partCount",
+    "recordCount",
+    "relationSetCount",
+    "maximumPartBytes",
+    "maximumRowBytes",
+    "partRowLimit"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "admission-required"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "reason": { "$ref": "#/properties/reason" }
+        },
+        "required": ["reason"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ready"
+          },
+          "partCount": {
+            "const": 0
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "confirmationToken": { "$ref": "#/properties/confirmationToken" }
+        },
+        "required": ["confirmationToken"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ready"
+          },
+          "partCount": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "firstPart": { "$ref": "#/properties/firstPart" }
+        },
+        "required": ["firstPart"]
+      }
+    }
+  ]
+}

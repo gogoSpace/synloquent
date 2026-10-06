@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://synloquent.local/protocol/1/error.schema.json",
+  "type": "object",
+  "properties": {
+    "code": {
+      "enum": [
+        "unknown_model",
+        "unknown_field",
+        "unknown_relation",
+        "forbidden_operation",
+        "forbidden_field",
+        "unsupported_query",
+        "validation_failed",
+        "conflict",
+        "schema_mismatch",
+        "cursor_expired",
+        "idempotency_mismatch",
+        "upgrade_required",
+        "stale_generation",
+        "incomplete_dataset",
+        "invalid_snapshot",
+        "authentication_required",
+        "rate_limited",
+        "causal_dependency",
+        "not_found",
+        "snapshot_invalid",
+        "session_changed",
+        "closed_database",
+        "operation_attempted",
+        "confirmation_timeout"
+      ]
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 4096
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "value.schema.json"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": ["code", "message"]
+}

@@ -1,0 +1,988 @@
+{
+  "witnesses": [
+    {
+      "methods": ["C52.completeDataset", "C55.snapshot"],
+      "target": "local",
+      "testcase": "initial consistent snapshot and batched relations",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C52.completeDataset", "C55.snapshot"],
+      "target": "remote",
+      "testcase": "initial consistent snapshot and batched relations",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": [
+        "C02.find",
+        "C02.findOrFail",
+        "C02.first",
+        "C02.firstOrFail",
+        "C02.get",
+        "C02.all"
+      ],
+      "target": "local",
+      "testcase": "local portable C02 identity retrieval and not-found boundaries",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": ["C09.select", "C09.addSelect", "C09.distinct"],
+      "target": "local",
+      "testcase": "local portable C09 projections and stable distinct representative",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C10.where",
+        "C10.orWhere",
+        "C10.groupedAnd",
+        "C10.groupedOr",
+        "C10.groupedNot",
+        "C10.whereColumn"
+      ],
+      "target": "local",
+      "testcase": "local portable C10 bound comparison and grouped boolean construction",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C11.whereIn",
+        "C11.whereNotIn",
+        "C11.whereNull",
+        "C11.whereNotNull",
+        "C11.whereBetween",
+        "C11.whereNotBetween"
+      ],
+      "target": "local",
+      "testcase": "local portable C11 membership null and range operators",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C12.like",
+        "C12.caseSensitiveComparison",
+        "C12.unicodeComparison"
+      ],
+      "target": "local",
+      "testcase": "local portable C12 ASCII LIKE and binary equality have explicit Unicode behavior",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C13.jsonScalarArrayContains",
+        "C13.jsonNullArrayContains",
+        "C13.jsonScalarPath",
+        "C13.unsupportedLocalObjectContains"
+      ],
+      "target": "local",
+      "testcase": "local portable C13 scalar JSON arrays retain null and scalar type distinctions",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C14.orderBy",
+        "C14.orderByDesc",
+        "C14.reorder",
+        "C14.latest",
+        "C14.oldest",
+        "C14.identityTiebreaker",
+        "C15.limit",
+        "C15.take",
+        "C15.offset",
+        "C15.skip"
+      ],
+      "target": "local",
+      "testcase": "local portable C14 C15 explicit ordering stable ties and pagination bounds",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C16.value",
+        "C16.pluck",
+        "C16.exists",
+        "C16.doesntExist",
+        "C16.count",
+        "C16.min",
+        "C16.max",
+        "C16.sum",
+        "C16.avg"
+      ],
+      "target": "local",
+      "testcase": "local portable C16 scalar field/existence and exact aggregate results",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": ["C17.groupBy", "C17.having"],
+      "target": "local",
+      "testcase": "local portable C17 declared grouped aggregation and having",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C18.paginate",
+        "C18.simplePaginate",
+        "C18.cursorPaginate",
+        "C18.cursorScope"
+      ],
+      "target": "local",
+      "testcase": "local portable C18 pages and scope-bound keyset cursor survive boundary progression",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C19.chunk",
+        "C19.chunkById",
+        "C19.lazy",
+        "C19.lazyById",
+        "C19.cursor",
+        "C19.iterationIsolation"
+      ],
+      "target": "local",
+      "testcase": "local portable C19 all async iteration methods traverse bounded pages",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": ["C20.when", "C20.unless", "C20.immutableBranches"],
+      "target": "local",
+      "testcase": "local portable C20 conditional immutable branches retain the original builder",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": ["C21.join", "C21.leftJoin", "C21.joinedAuthorization"],
+      "target": "local",
+      "testcase": "local portable C21 explicit authorized joins preserve base projection",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C22.selectSub",
+        "C22.whereSub",
+        "C22.whereExists",
+        "C22.whereNotExists",
+        "C22.union",
+        "C22.unionAll"
+      ],
+      "target": "local",
+      "testcase": "local portable C22 scalar and correlated subqueries plus ordered union variants",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C35.with",
+        "C35.nestedWith",
+        "C35.constrainedWith",
+        "C35.eagerFieldSelection"
+      ],
+      "target": "local",
+      "testcase": "local portable C35 eager nesting constraints and relation field projection",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C37.has",
+        "C37.doesntHave",
+        "C37.whereHas",
+        "C37.whereDoesntHave",
+        "C37.orHas",
+        "C37.orDoesntHave",
+        "C37.orWhereHas",
+        "C37.orWhereDoesntHave"
+      ],
+      "target": "local",
+      "testcase": "local portable C37 relation counts predicates and every OR variant",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": ["C38.whereRelation", "C38.whereBelongsTo"],
+      "target": "local",
+      "testcase": "local portable C38 related field and explicit belongs-to filters",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": ["C38.whereMorphRelation"],
+      "target": "local",
+      "testcase": "local portable C38 morph relation predicates retain explicit target identity and type",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C39.withCount",
+        "C39.withExists",
+        "C39.withSum",
+        "C39.withMin",
+        "C39.withMax",
+        "C39.withAvg"
+      ],
+      "target": "local",
+      "testcase": "local portable C39 batched readonly relation aggregate metadata",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C28.belongsTo",
+        "C29.hasOne",
+        "C29.hasMany",
+        "C30.belongsToMany",
+        "C30.customPivotTable",
+        "C30.customPivotKeys",
+        "C30.compositePivotIdentity",
+        "C31.hasOneThrough",
+        "C31.hasManyThrough",
+        "C32.morphTo",
+        "C32.morphOne",
+        "C32.morphMany",
+        "C32.explicitMorphMap",
+        "C33.morphToMany",
+        "C33.morphedByMany"
+      ],
+      "target": "local",
+      "testcase": "local portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C36.load",
+        "C36.loadMissing",
+        "C36.batchedLazyLoading",
+        "C36.noHiddenPropertyIO"
+      ],
+      "target": "local",
+      "testcase": "local portable C36 explicit lazy loading has no property IO and loads only missing caches",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C39.loadCount",
+        "C39.loadExists",
+        "C39.loadSum",
+        "C39.loadMin",
+        "C39.loadMax",
+        "C39.loadAvg"
+      ],
+      "target": "local",
+      "testcase": "local portable C39 explicit loaded aggregates retain read-only result metadata",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C40.pivotAttributes",
+        "C40.withPivot",
+        "C40.pivotCast",
+        "C40.wherePivot",
+        "C40.orderByPivot"
+      ],
+      "target": "local",
+      "testcase": "local portable C40 pivot projection casts filters and ordering use exported attributes",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C02.find",
+        "C02.findOrFail",
+        "C02.first",
+        "C02.firstOrFail",
+        "C02.get",
+        "C02.all"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C02 identity retrieval and not-found boundaries",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": ["C09.select", "C09.addSelect", "C09.distinct"],
+      "target": "remote",
+      "testcase": "remote portable C09 projections and stable distinct representative",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C10.where",
+        "C10.orWhere",
+        "C10.groupedAnd",
+        "C10.groupedOr",
+        "C10.groupedNot",
+        "C10.whereColumn"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C10 bound comparison and grouped boolean construction",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C11.whereIn",
+        "C11.whereNotIn",
+        "C11.whereNull",
+        "C11.whereNotNull",
+        "C11.whereBetween",
+        "C11.whereNotBetween"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C11 membership null and range operators",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C12.like",
+        "C12.caseSensitiveComparison",
+        "C12.unicodeComparison"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C12 ASCII LIKE and binary equality have explicit Unicode behavior",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C13.jsonScalarArrayContains",
+        "C13.jsonNullArrayContains",
+        "C13.jsonScalarPath",
+        "C13.unsupportedLocalObjectContains"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C13 scalar JSON arrays retain null and scalar type distinctions",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C14.orderBy",
+        "C14.orderByDesc",
+        "C14.reorder",
+        "C14.latest",
+        "C14.oldest",
+        "C14.identityTiebreaker",
+        "C15.limit",
+        "C15.take",
+        "C15.offset",
+        "C15.skip"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C14 C15 explicit ordering stable ties and pagination bounds",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C16.value",
+        "C16.pluck",
+        "C16.exists",
+        "C16.doesntExist",
+        "C16.count",
+        "C16.min",
+        "C16.max",
+        "C16.sum",
+        "C16.avg"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C16 scalar field/existence and exact aggregate results",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": ["C17.groupBy", "C17.having"],
+      "target": "remote",
+      "testcase": "remote portable C17 declared grouped aggregation and having",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C18.paginate",
+        "C18.simplePaginate",
+        "C18.cursorPaginate",
+        "C18.cursorScope"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C18 pages and scope-bound keyset cursor survive boundary progression",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C19.chunk",
+        "C19.chunkById",
+        "C19.lazy",
+        "C19.lazyById",
+        "C19.cursor",
+        "C19.iterationIsolation"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C19 all async iteration methods traverse bounded pages",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": ["C20.when", "C20.unless", "C20.immutableBranches"],
+      "target": "remote",
+      "testcase": "remote portable C20 conditional immutable branches retain the original builder",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": ["C21.join", "C21.leftJoin", "C21.joinedAuthorization"],
+      "target": "remote",
+      "testcase": "remote portable C21 explicit authorized joins preserve base projection",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C22.selectSub",
+        "C22.whereSub",
+        "C22.whereExists",
+        "C22.whereNotExists",
+        "C22.union",
+        "C22.unionAll"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C22 scalar and correlated subqueries plus ordered union variants",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C35.with",
+        "C35.nestedWith",
+        "C35.constrainedWith",
+        "C35.eagerFieldSelection"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C35 eager nesting constraints and relation field projection",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C37.has",
+        "C37.doesntHave",
+        "C37.whereHas",
+        "C37.whereDoesntHave",
+        "C37.orHas",
+        "C37.orDoesntHave",
+        "C37.orWhereHas",
+        "C37.orWhereDoesntHave"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C37 relation counts predicates and every OR variant",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": ["C38.whereRelation", "C38.whereBelongsTo"],
+      "target": "remote",
+      "testcase": "remote portable C38 related field and explicit belongs-to filters",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": ["C38.whereMorphRelation"],
+      "target": "remote",
+      "testcase": "remote portable C38 morph relation predicates retain explicit target identity and type",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C39.withCount",
+        "C39.withExists",
+        "C39.withSum",
+        "C39.withMin",
+        "C39.withMax",
+        "C39.withAvg"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C39 batched readonly relation aggregate metadata",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C28.belongsTo",
+        "C29.hasOne",
+        "C29.hasMany",
+        "C30.belongsToMany",
+        "C30.customPivotTable",
+        "C30.customPivotKeys",
+        "C30.compositePivotIdentity",
+        "C31.hasOneThrough",
+        "C31.hasManyThrough",
+        "C32.morphTo",
+        "C32.morphOne",
+        "C32.morphMany",
+        "C32.explicitMorphMap",
+        "C33.morphToMany",
+        "C33.morphedByMany"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C28 C29 C30 C31 C32 C33 reflected relation families and both pivot directions",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C36.load",
+        "C36.loadMissing",
+        "C36.batchedLazyLoading",
+        "C36.noHiddenPropertyIO"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C36 explicit lazy loading has no property IO and loads only missing caches",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C39.loadCount",
+        "C39.loadExists",
+        "C39.loadSum",
+        "C39.loadMin",
+        "C39.loadMax",
+        "C39.loadAvg"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C39 explicit loaded aggregates retain read-only result metadata",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C40.pivotAttributes",
+        "C40.withPivot",
+        "C40.pivotCast",
+        "C40.wherePivot",
+        "C40.orderByPivot"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C40 pivot projection casts filters and ordering use exported attributes",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C03.create",
+        "C03.fill",
+        "C03.forceFill",
+        "C03.save",
+        "C03.update",
+        "C03.delete",
+        "C04.fresh",
+        "C04.refresh",
+        "C04.getOriginal",
+        "C04.getChanges",
+        "C04.isDirty",
+        "C04.isClean",
+        "C04.wasChanged",
+        "C04.canonicalProposalDistinction",
+        "C05.replicate",
+        "C05.defaults",
+        "C05.timestamps",
+        "C05.touch",
+        "C06.booleanCast",
+        "C06.integerCast",
+        "C06.stringCast",
+        "C06.floatPrecision",
+        "C06.decimalCast",
+        "C06.dateCast",
+        "C06.datetimeCast",
+        "C06.jsonCast",
+        "C06.enumCast",
+        "C07.customCast",
+        "C07.accessor",
+        "C07.materializedAppend",
+        "C07.offlineAvailability",
+        "C08.hiddenSerialization",
+        "C08.visibleSerialization",
+        "C08.readableProjection",
+        "C08.writableProjection",
+        "C25.increment",
+        "C25.decrement"
+      ],
+      "target": "local",
+      "testcase": "local portable C03 C04 C05 C06 C07 C08 C25 durable drafts and actual canonical writes",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C01.integerKey",
+        "C01.stringKey",
+        "C01.customKey",
+        "C01.uuid",
+        "C01.ulid",
+        "C01.localIdentity",
+        "C05.nonIncrementingKey"
+      ],
+      "target": "local",
+      "testcase": "local portable C01 C05 assigned UUID ULID custom string keys and stable local aliases",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C23.firstOrCreate",
+        "C23.firstOrNew",
+        "C23.updateOrCreate",
+        "C24.upsert",
+        "C24.insert",
+        "C24.bulkUpdate",
+        "C24.bulkDelete",
+        "C24.batchAtomicity",
+        "C24.bulkEventDistinction"
+      ],
+      "target": "local",
+      "testcase": "local portable C23 C24 unique helpers and bounded atomic bulk event intent",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": ["C12.unicodeComparison"],
+      "target": "local",
+      "testcase": "local portable C12 positive UTF8 equality and binary ordering of acknowledged rows",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C28.associate",
+        "C28.dissociate",
+        "C41.attach",
+        "C41.detach",
+        "C41.toggle",
+        "C41.updateExistingPivot",
+        "C41.relationRevision",
+        "C43.relationCreate",
+        "C43.relationCreateMany",
+        "C43.relationSave",
+        "C43.relationSaveMany",
+        "C43.relatedDelete",
+        "C44.softDelete",
+        "C44.withTrashed",
+        "C44.onlyTrashed",
+        "C44.restore",
+        "C44.forceDeleteAuthorization"
+      ],
+      "target": "local",
+      "testcase": "local portable C28 C41 C43 C44 association relation writes pivot operations and soft lifecycle",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C03.create",
+        "C03.fill",
+        "C03.forceFill",
+        "C03.save",
+        "C03.update",
+        "C03.delete",
+        "C04.fresh",
+        "C04.refresh",
+        "C04.getOriginal",
+        "C04.getChanges",
+        "C04.isDirty",
+        "C04.isClean",
+        "C04.wasChanged",
+        "C04.canonicalProposalDistinction",
+        "C05.replicate",
+        "C05.defaults",
+        "C05.timestamps",
+        "C05.touch",
+        "C06.booleanCast",
+        "C06.integerCast",
+        "C06.stringCast",
+        "C06.floatPrecision",
+        "C06.decimalCast",
+        "C06.dateCast",
+        "C06.datetimeCast",
+        "C06.jsonCast",
+        "C06.enumCast",
+        "C07.customCast",
+        "C07.accessor",
+        "C07.materializedAppend",
+        "C07.offlineAvailability",
+        "C08.hiddenSerialization",
+        "C08.visibleSerialization",
+        "C08.readableProjection",
+        "C08.writableProjection",
+        "C25.increment",
+        "C25.decrement"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C03 C04 C05 C06 C07 C08 C25 durable drafts and actual canonical writes",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C01.integerKey",
+        "C01.stringKey",
+        "C01.customKey",
+        "C01.uuid",
+        "C01.ulid",
+        "C01.localIdentity",
+        "C05.nonIncrementingKey"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C01 C05 assigned UUID ULID custom string keys and stable local aliases",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C23.firstOrCreate",
+        "C23.firstOrNew",
+        "C23.updateOrCreate",
+        "C24.upsert",
+        "C24.insert",
+        "C24.bulkUpdate",
+        "C24.bulkDelete",
+        "C24.batchAtomicity",
+        "C24.bulkEventDistinction"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C23 C24 unique helpers and bounded atomic bulk event intent",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": ["C12.unicodeComparison"],
+      "target": "remote",
+      "testcase": "remote portable C12 positive UTF8 equality and binary ordering of acknowledged rows",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": [
+        "C28.associate",
+        "C28.dissociate",
+        "C41.attach",
+        "C41.detach",
+        "C41.toggle",
+        "C41.updateExistingPivot",
+        "C41.relationRevision",
+        "C43.relationCreate",
+        "C43.relationCreateMany",
+        "C43.relationSave",
+        "C43.relationSaveMany",
+        "C43.relatedDelete",
+        "C44.softDelete",
+        "C44.withTrashed",
+        "C44.onlyTrashed",
+        "C44.restore",
+        "C44.forceDeleteAuthorization"
+      ],
+      "target": "remote",
+      "testcase": "remote portable C28 C41 C43 C44 association relation writes pivot operations and soft lifecycle",
+      "source": "packages/client/tests/capability-scenarios.ts"
+    },
+    {
+      "methods": ["C57.retryUncertainty", "C57.immutableAttempt"],
+      "target": "local",
+      "testcase": "offline integer parent/child and immutable attempted payload replay",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C57.retryUncertainty", "C57.immutableAttempt"],
+      "target": "remote",
+      "testcase": "offline integer parent/child and immutable attempted payload replay",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": [
+        "C53.draftDirty",
+        "C53.durableIntent",
+        "C53.pending",
+        "C53.conflicted",
+        "C57.discardConflict"
+      ],
+      "target": "local",
+      "testcase": "canonical pull retains local proposal and explicit conflict resolution",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": [
+        "C53.draftDirty",
+        "C53.durableIntent",
+        "C53.pending",
+        "C53.conflicted",
+        "C57.discardConflict"
+      ],
+      "target": "remote",
+      "testcase": "canonical pull retains local proposal and explicit conflict resolution",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C13.jsonObjectContainsRemote"],
+      "target": "local",
+      "testcase": "typed registered command replay, remote scope and confirmed atomic delta",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C13.jsonObjectContainsRemote"],
+      "target": "remote",
+      "testcase": "typed registered command replay, remote scope and confirmed atomic delta",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C46.localScopeRemote", "C48.typedCommand"],
+      "target": "remote",
+      "testcase": "typed registered command replay, remote scope and confirmed atomic delta",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C53.synced", "C57.confirmedWrite"],
+      "target": "local",
+      "testcase": "typed registered command replay, remote scope and confirmed atomic delta",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C53.synced", "C57.confirmedWrite"],
+      "target": "remote",
+      "testcase": "typed registered command replay, remote scope and confirmed atomic delta",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": [
+        "C55.download",
+        "C55.snapshotRollback",
+        "C55.pendingEditPreservation",
+        "C51.querySubscription",
+        "C51.committedSnapshot",
+        "C51.cancelCleanup"
+      ],
+      "target": "local",
+      "testcase": "real actor boundaries, snapshot corruption rollback and reactive delete",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": [
+        "C55.download",
+        "C55.snapshotRollback",
+        "C55.pendingEditPreservation",
+        "C51.querySubscription",
+        "C51.committedSnapshot",
+        "C51.cancelCleanup"
+      ],
+      "target": "remote",
+      "testcase": "real actor boundaries, snapshot corruption rollback and reactive delete",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C16.partialCompletenessGuard", "C52.partialDataset"],
+      "target": "local",
+      "testcase": "real HTTP partial results reject definitive aggregates and offline server execution",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C16.partialCompletenessGuard", "C52.partialDataset"],
+      "target": "remote",
+      "testcase": "real HTTP partial results reject definitive aggregates and offline server execution",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C46.unsupportedOfflineScope", "C49.unsupportedLocalLock"],
+      "target": "remote",
+      "testcase": "real HTTP partial results reject definitive aggregates and offline server execution",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": [
+        "C54.offlineBoot",
+        "C54.compatibleOnlineManifest",
+        "C54.cachedManifest",
+        "C54.unknownCapabilityGuard",
+        "C55.schemaBackfill"
+      ],
+      "target": "local",
+      "testcase": "compatible actual HTTP manifest backfills old bundled fields and retains offline proposal across restart",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": [
+        "C54.offlineBoot",
+        "C54.compatibleOnlineManifest",
+        "C54.cachedManifest",
+        "C54.unknownCapabilityGuard",
+        "C55.schemaBackfill"
+      ],
+      "target": "remote",
+      "testcase": "compatible actual HTTP manifest backfills old bundled fields and retains offline proposal across restart",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": [
+        "C25.atomicDeltaConflict",
+        "C53.rejected",
+        "C57.cancelUnattempted",
+        "C57.retryConflict"
+      ],
+      "target": "local",
+      "testcase": "real HTTP receipt rejection cancellation and delta conflict retry preserve canonical intent",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": [
+        "C25.atomicDeltaConflict",
+        "C53.rejected",
+        "C57.cancelUnattempted",
+        "C57.retryConflict"
+      ],
+      "target": "remote",
+      "testcase": "real HTTP receipt rejection cancellation and delta conflict retry preserve canonical intent",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": [
+        "C51.modelSubscription",
+        "C51.replacementCleanup",
+        "C51.logoutCleanup",
+        "C52.subscriptionMembership"
+      ],
+      "target": "local",
+      "testcase": "real HTTP model subscriptions replace committed membership and dispose on logout",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": [
+        "C51.modelSubscription",
+        "C51.replacementCleanup",
+        "C51.logoutCleanup",
+        "C52.subscriptionMembership"
+      ],
+      "target": "remote",
+      "testcase": "real HTTP model subscriptions replace committed membership and dispose on logout",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": [
+        "C56.accountPartition",
+        "C56.devicePartition",
+        "C56.epochSeparation",
+        "C56.sessionGeneration",
+        "C56.lateResponse"
+      ],
+      "target": "local",
+      "testcase": "actual HTTP late replies cannot cross account device epoch or session generations",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": [
+        "C56.accountPartition",
+        "C56.devicePartition",
+        "C56.epochSeparation",
+        "C56.sessionGeneration",
+        "C56.lateResponse"
+      ],
+      "target": "remote",
+      "testcase": "actual HTTP late replies cannot cross account device epoch or session generations",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C58.pendingDependencyDelete"],
+      "target": "local",
+      "testcase": "pending dependent edits survive a real HTTP snapshot before captured cascade deletion",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C58.pendingDependencyDelete"],
+      "target": "remote",
+      "testcase": "pending dependent edits survive a real HTTP snapshot before captured cascade deletion",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C17.groupBy", "C17.having"],
+      "target": "local",
+      "testcase": "grouped actual HTTP and SQLite aggregates preserve unsafe integer sum average and HAVING",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C17.groupBy", "C17.having"],
+      "target": "remote",
+      "testcase": "grouped actual HTTP and SQLite aggregates preserve unsafe integer sum average and HAVING",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C55.retentionResnapshot"],
+      "target": "local",
+      "testcase": "actual HTTP retention expiry installs a new snapshot and preserves unattempted work",
+      "source": "scripts/integration.test.ts"
+    },
+    {
+      "methods": ["C55.retentionResnapshot"],
+      "target": "remote",
+      "testcase": "actual HTTP retention expiry installs a new snapshot and preserves unattempted work",
+      "source": "scripts/integration.test.ts"
+    }
+  ]
+}

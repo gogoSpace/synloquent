@@ -1,0 +1,658 @@
+{
+  "fixture": "synthetic-catalog-v1",
+  "cases": [
+    {
+      "name": "all-order",
+      "query": {
+        "model": "Item"
+      },
+      "identities": ["1", "2", "3"]
+    },
+    {
+      "name": "boolean-equality",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "active",
+          "operator": "=",
+          "value": true
+        }
+      },
+      "identities": ["1", "3"]
+    },
+    {
+      "name": "bound-injection-value",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "title",
+          "operator": "=",
+          "value": "Alpine stamp' OR 1=1 --"
+        }
+      },
+      "identities": []
+    },
+    {
+      "name": "exact-decimal-range",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "price",
+          "operator": "between",
+          "value": ["7.25", "12.50"]
+        }
+      },
+      "identities": ["1", "2", "3"]
+    },
+    {
+      "name": "not-between",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "quantity",
+          "operator": "notBetween",
+          "value": [1, 2]
+        }
+      },
+      "identities": ["3"]
+    },
+    {
+      "name": "where-in",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "id",
+          "operator": "in",
+          "value": [1, 3]
+        }
+      },
+      "identities": ["1", "3"]
+    },
+    {
+      "name": "where-not-in",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "id",
+          "operator": "notIn",
+          "value": [1, 3]
+        }
+      },
+      "identities": ["2"]
+    },
+    {
+      "name": "null",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "category_id",
+          "operator": "isNull"
+        }
+      },
+      "identities": []
+    },
+    {
+      "name": "not-null",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "category_id",
+          "operator": "isNotNull"
+        }
+      },
+      "identities": ["1", "2", "3"]
+    },
+    {
+      "name": "column-comparison",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "column",
+          "field": "id",
+          "operator": "=",
+          "otherField": "quantity"
+        }
+      },
+      "identities": ["1", "2", "3"]
+    },
+    {
+      "name": "group-or-not",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "group",
+          "boolean": "or",
+          "predicates": [
+            {
+              "kind": "comparison",
+              "field": "id",
+              "operator": "=",
+              "value": 1
+            },
+            {
+              "kind": "not",
+              "predicate": {
+                "kind": "comparison",
+                "field": "active",
+                "operator": "=",
+                "value": true
+              }
+            }
+          ]
+        }
+      },
+      "identities": ["1", "2"]
+    },
+    {
+      "name": "case-sensitive-like",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "title",
+          "operator": "like",
+          "value": "alpine%"
+        }
+      },
+      "identities": []
+    },
+    {
+      "name": "like-prefix",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "title",
+          "operator": "like",
+          "value": "Alpine%"
+        }
+      },
+      "identities": ["1"]
+    },
+    {
+      "name": "json-path-scalar",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "metadata",
+          "operator": "jsonPath",
+          "value": {
+            "path": "$.region",
+            "value": "synthetic"
+          }
+        }
+      },
+      "identities": ["1", "2", "3"]
+    },
+    {
+      "name": "json-object-containment",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "metadata",
+          "operator": "jsonContains",
+          "value": {
+            "region": "synthetic"
+          }
+        }
+      },
+      "error": "unsupported_query"
+    },
+    {
+      "name": "order-tie-breaker",
+      "query": {
+        "model": "Item",
+        "orderBy": [
+          {
+            "field": "price",
+            "direction": "desc"
+          }
+        ]
+      },
+      "identities": ["1", "3", "2"]
+    },
+    {
+      "name": "binary-title-order",
+      "query": {
+        "model": "Item",
+        "orderBy": [
+          {
+            "field": "title",
+            "direction": "asc"
+          }
+        ]
+      },
+      "identities": ["1", "3", "2"]
+    },
+    {
+      "name": "limit-offset",
+      "query": {
+        "model": "Item",
+        "limit": 1,
+        "offset": 1
+      },
+      "identities": ["2"]
+    },
+    {
+      "name": "projected-fields",
+      "query": {
+        "model": "Item",
+        "select": ["id", "title"]
+      },
+      "identities": ["1", "2", "3"]
+    },
+    {
+      "name": "distinct-before-limit",
+      "query": {
+        "model": "Item",
+        "select": ["price"],
+        "distinct": true,
+        "limit": 2
+      },
+      "identities": ["1", "2"]
+    },
+    {
+      "name": "has-images",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "relation",
+          "relation": "images",
+          "operator": ">=",
+          "count": 1
+        }
+      },
+      "identities": ["1", "2", "3"]
+    },
+    {
+      "name": "doesnt-have-tags",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "relation",
+          "relation": "tags",
+          "operator": "=",
+          "count": 0
+        }
+      },
+      "identities": ["2", "3"]
+    },
+    {
+      "name": "where-related-category",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "relation",
+          "relation": "category",
+          "predicate": {
+            "kind": "comparison",
+            "field": "title",
+            "operator": "=",
+            "value": "Mountains"
+          }
+        }
+      },
+      "identities": ["1", "2", "3"]
+    },
+    {
+      "name": "inner-authorized-join",
+      "query": {
+        "model": "Item",
+        "joins": [
+          {
+            "type": "inner",
+            "model": "Category",
+            "alias": "category_join",
+            "on": [
+              {
+                "field": "category_id",
+                "otherField": "id"
+              }
+            ]
+          }
+        ],
+        "joinedWhere": [
+          {
+            "alias": "category_join",
+            "predicate": {
+              "kind": "comparison",
+              "field": "title",
+              "operator": "=",
+              "value": "Mountains"
+            }
+          }
+        ]
+      },
+      "identities": ["1", "2", "3"]
+    },
+    {
+      "name": "left-authorized-join",
+      "query": {
+        "model": "Item",
+        "joins": [
+          {
+            "type": "left",
+            "model": "Image",
+            "alias": "image_join",
+            "on": [
+              {
+                "field": "id",
+                "otherField": "item_id"
+              }
+            ]
+          }
+        ]
+      },
+      "identities": ["1", "2", "3"]
+    },
+    {
+      "name": "correlated-exists",
+      "query": {
+        "model": "Item",
+        "subqueries": [
+          {
+            "kind": "exists",
+            "query": {
+              "model": "Image"
+            },
+            "correlate": [
+              {
+                "innerField": "item_id",
+                "outerField": "id"
+              }
+            ]
+          }
+        ]
+      },
+      "identities": ["1", "2", "3"]
+    },
+    {
+      "name": "correlated-not-exists",
+      "query": {
+        "model": "Item",
+        "subqueries": [
+          {
+            "kind": "notExists",
+            "query": {
+              "model": "Image"
+            },
+            "correlate": [
+              {
+                "innerField": "item_id",
+                "outerField": "id"
+              }
+            ]
+          }
+        ]
+      },
+      "identities": []
+    },
+    {
+      "name": "same-resource-union",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "id",
+          "operator": "=",
+          "value": 1
+        },
+        "unions": [
+          {
+            "all": false,
+            "query": {
+              "model": "Item",
+              "where": {
+                "kind": "comparison",
+                "field": "id",
+                "operator": "=",
+                "value": 3
+              }
+            }
+          }
+        ]
+      },
+      "identities": ["1", "3"]
+    },
+    {
+      "name": "same-resource-union-all",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "id",
+          "operator": "=",
+          "value": 1
+        },
+        "unions": [
+          {
+            "all": true,
+            "query": {
+              "model": "Item",
+              "where": {
+                "kind": "comparison",
+                "field": "id",
+                "operator": "=",
+                "value": 1
+              }
+            }
+          }
+        ]
+      },
+      "identities": ["1", "1"]
+    },
+    {
+      "name": "aggregate-count-None",
+      "query": {
+        "model": "Item",
+        "aggregate": {
+          "function": "count"
+        }
+      },
+      "aggregate": 3
+    },
+    {
+      "name": "aggregate-sum-quantity",
+      "query": {
+        "model": "Item",
+        "aggregate": {
+          "function": "sum",
+          "field": "quantity"
+        }
+      },
+      "aggregate": 6
+    },
+    {
+      "name": "aggregate-min-quantity",
+      "query": {
+        "model": "Item",
+        "aggregate": {
+          "function": "min",
+          "field": "quantity"
+        }
+      },
+      "aggregate": 1
+    },
+    {
+      "name": "aggregate-max-quantity",
+      "query": {
+        "model": "Item",
+        "aggregate": {
+          "function": "max",
+          "field": "quantity"
+        }
+      },
+      "aggregate": 3
+    },
+    {
+      "name": "aggregate-avg-quantity",
+      "query": {
+        "model": "Item",
+        "aggregate": {
+          "function": "avg",
+          "field": "quantity"
+        }
+      },
+      "aggregate": 2
+    },
+    {
+      "name": "aggregate-sum-price",
+      "query": {
+        "model": "Item",
+        "aggregate": {
+          "function": "sum",
+          "field": "price"
+        }
+      },
+      "aggregate": "32.25"
+    },
+    {
+      "name": "aggregate-avg-price",
+      "query": {
+        "model": "Item",
+        "aggregate": {
+          "function": "avg",
+          "field": "price"
+        }
+      },
+      "aggregate": "10.75"
+    },
+    {
+      "name": "json-scalar-array-containment-excludes-objects",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "metadata",
+          "operator": "jsonContains",
+          "value": "synthetic"
+        }
+      },
+      "identities": []
+    },
+    {
+      "name": "json-array-null",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "labels",
+          "operator": "jsonContains",
+          "value": null
+        }
+      },
+      "identities": ["1"]
+    },
+    {
+      "name": "json-array-boolean",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "labels",
+          "operator": "jsonContains",
+          "value": true
+        }
+      },
+      "identities": ["1"]
+    },
+    {
+      "name": "json-array-integer",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "labels",
+          "operator": "jsonContains",
+          "value": 1
+        }
+      },
+      "identities": ["1"]
+    },
+    {
+      "name": "json-array-string",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "labels",
+          "operator": "jsonContains",
+          "value": "synthetic"
+        }
+      },
+      "identities": ["1"]
+    },
+    {
+      "name": "json-array-string-type-distinction",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "labels",
+          "operator": "jsonContains",
+          "value": "1"
+        }
+      },
+      "identities": []
+    },
+    {
+      "name": "json-array-absent",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "labels",
+          "operator": "jsonContains",
+          "value": false
+        }
+      },
+      "identities": []
+    },
+    {
+      "name": "json-sql-null-distinct-from-array-null",
+      "query": {
+        "model": "Item",
+        "where": {
+          "kind": "comparison",
+          "field": "labels",
+          "operator": "isNull"
+        }
+      },
+      "identities": ["2"]
+    },
+    {
+      "name": "distinct-projected-subset-without-limit",
+      "query": {
+        "model": "Item",
+        "select": ["price"],
+        "distinct": true
+      },
+      "identities": ["1", "2"]
+    },
+    {
+      "name": "distinct-projected-subset-descending-order",
+      "query": {
+        "model": "Item",
+        "select": ["price"],
+        "distinct": true,
+        "orderBy": [
+          {
+            "field": "price",
+            "direction": "desc"
+          }
+        ]
+      },
+      "identities": ["1", "2"]
+    }
+  ]
+}

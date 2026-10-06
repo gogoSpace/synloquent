@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://synloquent.local/protocol/1/record.schema.json",
+  "type": "object",
+  "properties": {
+    "localIdentity": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "attributes": {
+      "type": "object",
+      "maxProperties": 256,
+      "additionalProperties": {
+        "$ref": "value.schema.json"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": ["model", "id", "revision", "attributes"]
+}

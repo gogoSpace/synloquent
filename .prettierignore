@@ -1,0 +1,8 @@
+protocol/fixtures/backend.generated.ts
+examples/react-native/backend.generated.ts
+**/node_modules/**
+**/vendor/**
+**/dist/**
+**/build/**
+**/Pods/**
+.agentic/artifacts/**

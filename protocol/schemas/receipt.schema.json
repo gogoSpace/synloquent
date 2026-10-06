@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://synloquent.local/protocol/1/receipt.schema.json",
+  "type": "object",
+  "properties": {
+    "operationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "localIdentity": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024
+    },
+    "status": {
+      "enum": ["accepted", "conflicted", "rejected"]
+    },
+    "canonical": {
+      "$ref": "record.schema.json"
+    },
+    "error": {
+      "$ref": "error.schema.json"
+    },
+    "relationSets": {
+      "type": "array",
+      "maxItems": 100000,
+      "items": {
+        "$ref": "relation-set.schema.json"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": ["operationId", "localIdentity", "status"]
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://synloquent.local/protocol/1/query-response.schema.json",
+  "type": "object",
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "$ref": "record.schema.json"
+      },
+      "maxItems": 10000
+    },
+    "related": {
+      "type": "array",
+      "items": {
+        "$ref": "record.schema.json"
+      },
+      "maxItems": 100000
+    },
+    "completeness": {
+      "enum": ["complete", "partial"]
+    },
+    "scope": {
+      "$ref": "scope.schema.json"
+    },
+    "relationSets": {
+      "type": "array",
+      "maxItems": 100000,
+      "items": {
+        "$ref": "relation-set.schema.json"
+      }
+    },
+    "aggregate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value"],
+      "properties": {
+        "value": {
+          "$ref": "value.schema.json"
+        },
+        "groups": {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["keys", "value"],
+            "properties": {
+              "keys": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "value.schema.json"
+                }
+              },
+              "value": {
+                "$ref": "value.schema.json"
+              }
+            }
+          }
+        }
+      }
+    },
+    "computed": {
+      "type": "object",
+      "maxProperties": 10000,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "aggregates": {
+            "type": "object",
+            "maxProperties": 256,
+            "additionalProperties": {
+              "$ref": "value.schema.json"
+            }
+          },
+          "projections": {
+            "type": "object",
+            "maxProperties": 256,
+            "additionalProperties": {
+              "$ref": "value.schema.json"
+            }
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": ["records", "related", "completeness", "scope", "relationSets"]
+}

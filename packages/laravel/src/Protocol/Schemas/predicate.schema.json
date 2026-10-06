@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://synloquent.local/protocol/1/predicate.schema.json",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "comparison"
+        },
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "operator": {
+          "enum": [
+            "=",
+            "!=",
+            "<",
+            "<=",
+            ">",
+            ">=",
+            "in",
+            "notIn",
+            "isNull",
+            "isNotNull",
+            "between",
+            "notBetween",
+            "like",
+            "jsonContains",
+            "jsonPath"
+          ]
+        },
+        "value": {
+          "$ref": "value.schema.json"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["kind", "field", "operator"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "column"
+        },
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "operator": {
+          "enum": ["=", "!=", "<", "<=", ">", ">="]
+        },
+        "otherField": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      },
+      "additionalProperties": false,
+      "required": ["kind", "field", "operator", "otherField"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "group"
+        },
+        "boolean": {
+          "enum": ["and", "or"]
+        },
+        "predicates": {
+          "type": "array",
+          "items": {
+            "$ref": "#"
+          },
+          "maxItems": 64
+        }
+      },
+      "additionalProperties": false,
+      "required": ["kind", "boolean", "predicates"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "not"
+        },
+        "predicate": {
+          "$ref": "#"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["kind", "predicate"]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "relation"
+        },
+        "relation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "morphModels": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 128 }
+        },
+        "predicate": {
+          "$ref": "#"
+        },
+        "operator": {
+          "enum": ["=", "!=", "<", "<=", ">", ">="]
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        }
+      },
+      "additionalProperties": false,
+      "required": ["kind", "relation"]
+    }
+  ]
+}

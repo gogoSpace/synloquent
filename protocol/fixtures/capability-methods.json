@@ -1,0 +1,492 @@
+{
+  "version": 1,
+  "families": {
+    "C01": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "integerKey",
+        "stringKey",
+        "customKey",
+        "uuid",
+        "ulid",
+        "localIdentity"
+      ]
+    },
+    "C02": {
+      "targets": ["local", "remote"],
+      "methods": ["find", "findOrFail", "first", "firstOrFail", "get", "all"]
+    },
+    "C03": {
+      "targets": ["local", "remote"],
+      "methods": ["create", "fill", "forceFill", "save", "update", "delete"]
+    },
+    "C04": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "fresh",
+        "refresh",
+        "getOriginal",
+        "getChanges",
+        "isDirty",
+        "isClean",
+        "wasChanged",
+        "canonicalProposalDistinction"
+      ]
+    },
+    "C05": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "replicate",
+        "defaults",
+        "timestamps",
+        "touch",
+        "nonIncrementingKey"
+      ]
+    },
+    "C06": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "booleanCast",
+        "integerCast",
+        "stringCast",
+        "floatPrecision",
+        "decimalCast",
+        "dateCast",
+        "datetimeCast",
+        "jsonCast",
+        "enumCast"
+      ]
+    },
+    "C07": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "customCast",
+        "accessor",
+        "materializedAppend",
+        "offlineAvailability"
+      ]
+    },
+    "C08": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "hiddenSerialization",
+        "visibleSerialization",
+        "readableProjection",
+        "writableProjection"
+      ]
+    },
+    "C09": {
+      "targets": ["local", "remote"],
+      "methods": ["select", "addSelect", "distinct"]
+    },
+    "C10": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "where",
+        "orWhere",
+        "groupedAnd",
+        "groupedOr",
+        "groupedNot",
+        "whereColumn"
+      ]
+    },
+    "C11": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "whereIn",
+        "whereNotIn",
+        "whereNull",
+        "whereNotNull",
+        "whereBetween",
+        "whereNotBetween"
+      ]
+    },
+    "C12": {
+      "targets": ["local", "remote"],
+      "methods": ["like", "caseSensitiveComparison", "unicodeComparison"]
+    },
+    "C13": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "jsonScalarArrayContains",
+        "jsonNullArrayContains",
+        "jsonScalarPath",
+        "jsonObjectContainsRemote",
+        "unsupportedLocalObjectContains"
+      ]
+    },
+    "C14": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "orderBy",
+        "orderByDesc",
+        "reorder",
+        "latest",
+        "oldest",
+        "identityTiebreaker"
+      ]
+    },
+    "C15": {
+      "targets": ["local", "remote"],
+      "methods": ["limit", "take", "offset", "skip"]
+    },
+    "C16": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "value",
+        "pluck",
+        "exists",
+        "doesntExist",
+        "count",
+        "min",
+        "max",
+        "sum",
+        "avg",
+        "partialCompletenessGuard"
+      ]
+    },
+    "C17": {
+      "targets": ["local", "remote"],
+      "methods": ["groupBy", "having"]
+    },
+    "C18": {
+      "targets": ["local", "remote"],
+      "methods": ["paginate", "simplePaginate", "cursorPaginate", "cursorScope"]
+    },
+    "C19": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "chunk",
+        "chunkById",
+        "lazy",
+        "lazyById",
+        "cursor",
+        "iterationIsolation"
+      ]
+    },
+    "C20": {
+      "targets": ["local", "remote"],
+      "methods": ["when", "unless", "immutableBranches"]
+    },
+    "C21": {
+      "targets": ["local", "remote"],
+      "methods": ["join", "leftJoin", "joinedAuthorization"]
+    },
+    "C22": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "selectSub",
+        "whereSub",
+        "whereExists",
+        "whereNotExists",
+        "union",
+        "unionAll"
+      ]
+    },
+    "C23": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "firstOrCreate",
+        "firstOrNew",
+        "updateOrCreate",
+        "uniquenessConflict"
+      ]
+    },
+    "C24": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "upsert",
+        "insert",
+        "bulkUpdate",
+        "bulkDelete",
+        "batchAtomicity",
+        "bulkEventDistinction"
+      ]
+    },
+    "C25": {
+      "targets": ["local", "remote"],
+      "methods": ["increment", "decrement", "atomicDeltaConflict"]
+    },
+    "C26": {
+      "targets": ["local"],
+      "methods": ["transaction", "rollback", "savepoint", "nestedRollback"]
+    },
+    "C27": {
+      "targets": ["remote"],
+      "methods": ["atomicGroup", "causalDependency", "atomicFailure"]
+    },
+    "C28": {
+      "targets": ["local", "remote"],
+      "methods": ["belongsTo", "associate", "dissociate"]
+    },
+    "C29": {
+      "targets": ["local", "remote"],
+      "methods": ["hasOne", "hasMany", "customForeignKey", "customLocalKey"]
+    },
+    "C30": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "belongsToMany",
+        "customPivotTable",
+        "customPivotKeys",
+        "compositePivotIdentity"
+      ]
+    },
+    "C31": {
+      "targets": ["local", "remote"],
+      "methods": ["hasOneThrough", "hasManyThrough"]
+    },
+    "C32": {
+      "targets": ["local", "remote"],
+      "methods": ["morphTo", "morphOne", "morphMany", "explicitMorphMap"]
+    },
+    "C33": {
+      "targets": ["local", "remote"],
+      "methods": ["morphToMany", "morphedByMany"]
+    },
+    "C34": {
+      "targets": ["local", "remote"],
+      "methods": ["ofMany", "latestOfMany", "oldestOfMany", "deterministicTie"]
+    },
+    "C35": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "with",
+        "nestedWith",
+        "constrainedWith",
+        "eagerFieldSelection"
+      ]
+    },
+    "C36": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "load",
+        "loadMissing",
+        "batchedLazyLoading",
+        "noHiddenPropertyIO"
+      ]
+    },
+    "C37": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "has",
+        "doesntHave",
+        "whereHas",
+        "whereDoesntHave",
+        "orHas",
+        "orDoesntHave",
+        "orWhereHas",
+        "orWhereDoesntHave"
+      ]
+    },
+    "C38": {
+      "targets": ["local", "remote"],
+      "methods": ["whereRelation", "whereBelongsTo", "whereMorphRelation"]
+    },
+    "C39": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "withCount",
+        "withExists",
+        "withSum",
+        "withMin",
+        "withMax",
+        "withAvg",
+        "loadCount",
+        "loadExists",
+        "loadSum",
+        "loadMin",
+        "loadMax",
+        "loadAvg"
+      ]
+    },
+    "C40": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "pivotAttributes",
+        "withPivot",
+        "pivotCast",
+        "wherePivot",
+        "orderByPivot"
+      ]
+    },
+    "C41": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "attach",
+        "detach",
+        "toggle",
+        "updateExistingPivot",
+        "relationRevision"
+      ]
+    },
+    "C42": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "sync",
+        "syncWithoutDetaching",
+        "completeSetGuard",
+        "staleRevisionConflict"
+      ]
+    },
+    "C43": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "relationCreate",
+        "relationCreateMany",
+        "relationSave",
+        "relationSaveMany",
+        "relatedDelete"
+      ]
+    },
+    "C44": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "softDelete",
+        "withTrashed",
+        "onlyTrashed",
+        "restore",
+        "forceDeleteAuthorization"
+      ]
+    },
+    "C45": {
+      "targets": ["local"],
+      "methods": [
+        "map",
+        "filter",
+        "reject",
+        "pluck",
+        "keyBy",
+        "groupBy",
+        "sort",
+        "unique",
+        "chunk"
+      ]
+    },
+    "C46": {
+      "targets": ["remote"],
+      "methods": [
+        "localScopeRemote",
+        "globalScope",
+        "scopeInputValidation",
+        "unsupportedOfflineScope"
+      ]
+    },
+    "C47": {
+      "targets": ["remote"],
+      "methods": [
+        "observer",
+        "creatingCreated",
+        "updatingUpdated",
+        "deletingDeleted",
+        "bulkBypassesInstanceEvents"
+      ]
+    },
+    "C48": {
+      "targets": ["remote"],
+      "methods": [
+        "typedCommand",
+        "commandAuthorization",
+        "durableEffect",
+        "downstreamIdempotency",
+        "atLeastOnceControl",
+        "commandLostResponse"
+      ]
+    },
+    "C49": {
+      "targets": ["remote"],
+      "methods": ["lockForUpdate", "sharedLock", "unsupportedLocalLock"]
+    },
+    "C50": {
+      "targets": ["remote"],
+      "methods": [
+        "registeredSqlFunction",
+        "registeredExpression",
+        "unsupportedUnregisteredSql"
+      ]
+    },
+    "C51": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "querySubscription",
+        "modelSubscription",
+        "committedSnapshot",
+        "cancelCleanup",
+        "unmountCleanup",
+        "logoutCleanup",
+        "replacementCleanup"
+      ]
+    },
+    "C52": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "completeDataset",
+        "partialDataset",
+        "subscriptionMembership",
+        "authorizationGeneration"
+      ]
+    },
+    "C53": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "draftDirty",
+        "durableIntent",
+        "pending",
+        "synced",
+        "rejected",
+        "conflicted"
+      ]
+    },
+    "C54": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "offlineBoot",
+        "compatibleOnlineManifest",
+        "cachedManifest",
+        "unknownCapabilityGuard"
+      ]
+    },
+    "C55": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "snapshot",
+        "retentionResnapshot",
+        "schemaBackfill",
+        "pendingEditPreservation",
+        "snapshotRollback",
+        "download"
+      ]
+    },
+    "C56": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "accountPartition",
+        "devicePartition",
+        "sessionGeneration",
+        "lateResponse",
+        "epochSeparation"
+      ]
+    },
+    "C57": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "confirmedWrite",
+        "retryUncertainty",
+        "discardConflict",
+        "retryConflict",
+        "cancelUnattempted",
+        "immutableAttempt"
+      ]
+    },
+    "C58": {
+      "targets": ["local", "remote"],
+      "methods": [
+        "cascadeDelete",
+        "restrictDelete",
+        "nullifyDelete",
+        "capturedRelationChanges",
+        "pendingDependencyDelete"
+      ]
+    }
+  }
+}
