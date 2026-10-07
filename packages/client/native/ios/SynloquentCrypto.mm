@@ -64,7 +64,7 @@ RCT_EXPORT_MODULE(NativeSynloquentCrypto)
             else if (conditions & DISPATCH_MEMORYPRESSURE_WARN) kind = @"warning";
             else if (conditions & DISPATCH_MEMORYPRESSURE_NORMAL) kind = @"normal";
             const double observedAt = ReadClockMilliseconds(CLOCK_MONOTONIC);
-            if (kind && observedAt >= 0) [strongSelf emitOnMemoryPressure:@{@"kind": kind, @"observedAtMonotonicMilliseconds": @(observedAt)}];
+            if (kind && observedAt >= 0) [strongSelf emitOnMemoryPressure:@{@"kind": kind, @"source": @"dispatch-memory-pressure", @"observedAtMonotonicMilliseconds": @(observedAt)}];
           }
         });
         dispatch_resume(_memoryPressureSource);

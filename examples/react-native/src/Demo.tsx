@@ -66,7 +66,7 @@ function Catalog({
     () =>
       client
         .query('Item')
-        .where('title', 'like', 'Pre-alpha%')
+        .where('title', 'like', 'Example %')
         .orderBy('title')
         .take(50),
     [client],
@@ -123,6 +123,7 @@ function Catalog({
     id: item.id,
     title: item.attributes.title,
     quantity: item.attributes.quantity,
+    price: item.attributes.price,
     syncState: item.syncState,
   }))
   const state = JSON.stringify({
@@ -133,29 +134,29 @@ function Catalog({
   })
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Synloquent pre-alpha</Text>
+      <Text style={styles.title}>Synloquent catalog</Text>
       <Text>Small offline catalog. Sync only when you choose.</Text>
       <Text
-        testID="prealpha-status"
+        testID="example-status"
         accessibilityLabel={status}
         style={styles.status}
       >
         {status}
       </Text>
       <Button
-        testID="prealpha-create"
-        title="Create A and B offline"
+        testID="example-create"
+        title="Create products offline"
         disabled={working || rows.length > 0}
         onPress={() =>
           void perform('Creating offline', async () => {
             await client.transaction(async (transaction) => {
               await transaction.models.Item.create({
-                title: 'Pre-alpha A',
+                title: 'Example Notebook',
                 price: '12.50',
                 quantity: 1,
               })
               await transaction.models.Item.create({
-                title: 'Pre-alpha B',
+                title: 'Example Bottle',
                 price: '7.25',
                 quantity: 1,
               })
@@ -164,23 +165,23 @@ function Catalog({
         }
       />
       <Button
-        testID="prealpha-update"
-        title="Update A offline"
+        testID="example-update"
+        title="Update notebook offline"
         disabled={working || rows.length === 0}
         onPress={() =>
           void perform('Updating offline', async () => {
             const item = await client.models.Item.where(
               'title',
               'like',
-              'Pre-alpha A%',
+              'Example Notebook%',
             ).firstOrFail()
-            item.fill({ title: 'Pre-alpha A updated', quantity: 2 })
+            item.fill({ title: 'Example Notebook updated', quantity: 2 })
             await item.save()
           })
         }
       />
       <Button
-        testID="prealpha-sync"
+        testID="example-sync"
         title="Sync with Laravel"
         disabled={working}
         onPress={() =>
@@ -191,14 +192,16 @@ function Catalog({
         }
       />
       <Button
-        testID="prealpha-delete"
-        title="Delete B locally"
-        disabled={working || !rows.some((row) => row.title === 'Pre-alpha B')}
+        testID="example-delete"
+        title="Delete bottle offline"
+        disabled={
+          working || !rows.some((row) => row.title === 'Example Bottle')
+        }
         onPress={() =>
           void perform('Deleting offline', async () => {
             const item = await client.models.Item.where(
               'title',
-              'Pre-alpha B',
+              'Example Bottle',
             ).firstOrFail()
             await item.delete()
           })
@@ -219,7 +222,7 @@ function Catalog({
         Local state for the reproducible walkthrough
       </Text>
       <Text
-        testID="prealpha-state"
+        testID="example-state"
         numberOfLines={3}
         accessibilityLabel={state}
         style={styles.details}

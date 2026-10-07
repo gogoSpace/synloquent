@@ -1,32 +1,32 @@
-# React Native offline example
+# Offline catalog example
 
-A small catalog using React Native 0.87.1, React 19.2.8, Hermes and OP-SQLite 18.2.5. The client is installed from the local npm archive and uses the public `createReactNativeClient` factory. Laravel generates the schema in `backend.generated.ts`.
+This small React Native application uses the packed `@synloquent/client` beta and the Laravel catalog host. Its entry screen imports only the public client APIs. The generated `Item` model represents a product, and the host also exports categories and related catalog resources.
 
-Follow [installation](../../docs/guides/installation.md) first. The ordinary app opens the demo directly. Its HTTP endpoint is port `8769`, through `10.0.2.2` on Android or `127.0.0.1` on the iOS simulator.
+Follow the [installation guide](../../docs/guides/installation.md) first. Both native platforms use Hermes and OP-SQLite 18.2.5. Android uses the host at `10.0.2.2:8769`, and the iOS simulator uses `127.0.0.1:8769`.
 
-## Offline edits and synchronization
+## Walkthrough
 
-Use a fresh application database and disposable Laravel database. The screen lists items whose titles start with `Pre-alpha`. Regular seeded items are outside this small walkthrough.
+Start with fresh demonstration app data. The screen shows only products created by the walkthrough, whose titles begin with `Example `. The seed's other catalog rows remain available through the generated query API.
 
-1. Stop your Laravel HTTP server. Keep Metro or the installed JavaScript bundle available.
-2. Tap **Create A and B offline**. One local transaction creates both items with quantity 1.
-3. Tap **Update A offline**. A becomes `Pre-alpha A updated` with quantity 2. B is unchanged.
-4. Completely terminate the application process and reopen the same installation without deleting its data. A, B and pending operations should remain. Fast Refresh and backgrounding are not process restarts.
-5. Start Laravel with the same database and keys, then tap **Sync with Laravel**. Verify both rows are `synced`, their server identities are assigned and pending changes are empty.
-6. Stop Laravel, then tap **Delete B locally**. B disappears locally and its delete remains pending.
-7. Completely terminate and reopen the same application again. A should remain, B should stay absent and the same pending delete should survive.
-8. Start Laravel and synchronize. Confirm that A remains and B is absent on both the client and server.
+1. Stop the Laravel HTTP server. Open the app and press **Create products offline**. A notebook and bottle appear, with pending changes.
+2. Press **Update notebook offline**. The notebook changes to quantity 2. Local reads and the screen update after the SQLite transaction commits.
+3. Force-stop the application and launch it again. Do not uninstall it or clear app data. Both records and their pending changes remain.
+4. Start Laravel and press **Sync with Laravel**. Pending operations are pushed and authorized canonical records are pulled. Both products become `synced` and the pending count reaches zero.
+5. Stop Laravel again and press **Delete bottle offline**. The bottle disappears while its deletion remains pending.
+6. Force-stop and relaunch the application again. The bottle stays absent and its pending deletion remains.
+7. Start Laravel and press **Sync with Laravel**. The deletion reaches the server. The notebook remains and the pending count returns to zero.
 
-Read the synthetic server data with:
+The small local-state view is a diagnostic aid for this example. It shows local and canonical identities, a per-process runtime identity and pending operation identities. A restart changes the runtime identity while preserving persisted records and synchronization intent.
 
-```sh
-psql --host=127.0.0.1 --port=55433 --username=postgres --dbname=synloquent_example --command="SELECT id, title, quantity FROM items ORDER BY id"
-```
+Stop the app with Android Settings → Apps → SynloquentExample → Force stop, or use `adb shell am force-stop com.synloquent.example` on your selected emulator. On iOS, terminate the selected simulator app and relaunch it. A development bundle reload is not a process restart. Release builds contain their JavaScript bundle and work without Metro.
 
-Local saves mean device durability, not server acceptance. Inspect row state, pending operations and server values instead of treating a common success message as acceptance of every operation. Do not reinstall the app or clear its database between restart steps.
+The UI deliberately performs synchronization only when you press its button. A failed request preserves pending operations for a later retry. Do not clear the database to resolve a timeout.
 
-This complete small A/B workflow has passed in an Android emulator and iOS simulator. It does not establish native relations, conflicts, schema backfill, physical devices or large-import performance. Use a separate synthetic server database per platform when repeating it so the fixed example titles do not collide.
+## Source overview
 
-## Application configuration
+- `App.tsx` opens the catalog directly.
+- `src/Demo.tsx` composes the public runtime, subscribes to a local query and implements the four buttons.
+- `backend.generated.ts` is generated by the configured Laravel host. Regenerate it after changing the schema or database engine.
+- The Composer example uses synthetic actor tokens for local demonstration. Replace them with authenticated application sessions and policies in a real host.
 
-The demo uses public synthetic credentials for the local example. A real application must supply request-bound authentication and a correctly scoped session. It must own one runtime and close it when disposed. See [client configuration](../../docs/guides/client.md) and [recovery behavior](../../docs/guides/sync-recovery.md).
+The beta walkthrough is a functional demonstration on an emulator and simulator. It does not establish performance for large catalogs or a broad physical-device support matrix.

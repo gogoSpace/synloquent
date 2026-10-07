@@ -23,6 +23,7 @@ import {
   validateAttributes,
 } from './values.js'
 import { verifySnapshotContent, snapshotPhase } from './snapshot-content.js'
+import { installSnapshotContents } from './snapshot-installation.js'
 import {
   discardSnapshotParts,
   installSnapshotParts,
@@ -691,98 +692,13 @@ export class SyncEngine {
       await this.storage.owner.replace(async (executor, changed) => {
         this.assertDigestCurrent(digest)
         this.verifySession(token)
-        snapshotPhase(this.storage.configuration, 'staging', 'begin')
-        await this.storage.stageSnapshotRecords(snapshot.records, executor)
-        await this.storage.clearCanonicalRelations(executor, changed)
-        snapshotPhase(this.storage.configuration, 'records', 'begin')
-        try {
-          await this.storage.ingestSnapshotRecords(
-            snapshot.records,
-            executor,
-            changed,
-          )
-        } finally {
-          snapshotPhase(this.storage.configuration, 'records', 'end')
-        }
-        snapshotPhase(this.storage.configuration, 'relationSets', 'begin')
-        try {
-          await this.storage.ingestSnapshotRelationSets(
-            snapshot.relationSets,
-            executor,
-            changed,
-          )
-        } finally {
-          snapshotPhase(this.storage.configuration, 'relationSets', 'end')
-        }
-        for (const entry of await this.storage.pending(executor))
-          if (
-            ['pending', 'sending', 'conflicted', 'rejected'].includes(
-              entry.status,
-            )
-          ) {
-            const record = await this.storage.findStored(
-              entry.operation.model,
-              entry.operation.localIdentity,
-              executor,
-            )
-            if (record?.serverIdentity === null)
-              await this.storage.persist(
-                { ...record, visible: true },
-                executor,
-                changed,
-              )
-            else if (
-              record &&
-              !record.visible &&
-              Object.keys(record.proposal).length
-            )
-              await executor.execute(
-                'INSERT OR REPLACE INTO syn_recovery(partition,model,local_identity,proposal,reason) VALUES (?,?,?,?,?)',
-                [
-                  this.storage.partition,
-                  record.model,
-                  record.localIdentity,
-                  canonicalJson(record.proposal),
-                  'snapshot_scope_removed',
-                ],
-              )
-          }
-        await this.storage.applyPendingDeleteEffects(executor, changed)
-        await this.storage.rebuildRelationOverlays(executor, changed)
-        snapshotPhase(this.storage.configuration, 'integrity', 'begin')
-        try {
-          const integrity = await executor.execute('PRAGMA integrity_check')
-          if (integrity.rows.some((row) => !Object.values(row).includes('ok')))
-            throw new SynloquentError(
-              'snapshot_invalid',
-              'SQLite integrity check failed.',
-            )
-          const foreignKeys = await executor.execute('PRAGMA foreign_key_check')
-          if (foreignKeys.rows.length)
-            throw new SynloquentError(
-              'snapshot_invalid',
-              'SQLite foreign key validation failed.',
-            )
-        } finally {
-          snapshotPhase(this.storage.configuration, 'integrity', 'end')
-        }
-        await this.storage.setMetadata(
-          `cursor:${snapshot.dataset}`,
-          snapshot.cursor,
+        await installSnapshotContents(
+          this.storage,
+          snapshot,
+          { kind: 'inline', snapshot },
           executor,
+          changed,
         )
-        await this.storage.setMetadata(
-          'scope',
-          canonicalJson(snapshot.scope),
-          executor,
-        )
-        await this.storage.setMetadata(
-          'snapshotGeneration',
-          snapshot.generation,
-          executor,
-        )
-        changed.add('*')
-        snapshotPhase(this.storage.configuration, 'staging', 'end')
         committing = true
         snapshotPhase(this.storage.configuration, 'commit', 'begin')
       })
@@ -875,10 +791,11 @@ export class SyncEngine {
     const digest = await this.verifySnapshot(snapshot)
     this.assertDigestCurrent(digest)
     this.verifySession(token)
-    await this.storage.owner.replace(async (executor, changed) => {
-      this.assertDigestCurrent(digest)
-      this.verifySession(token)
-      try {
+    await this.storage.owner.replace(
+      async (executor, changed) => {
+        this.assertDigestCurrent(digest)
+        this.verifySession(token)
+        const storage = this.storage.withManifest(manifest)
         for (const [model, next] of Object.entries(manifest.models)) {
           const previous = current.models[model]
           if (previous)
@@ -896,61 +813,21 @@ export class SyncEngine {
                   )
               }
         }
-        await this.storage.createSchema(executor, manifest)
+        await storage.createSchema(executor, manifest)
+        await installSnapshotContents(
+          storage,
+          snapshot,
+          { kind: 'inline', snapshot },
+          executor,
+          changed,
+        )
+        await storage.setMetadata('manifest', canonicalJson(manifest), executor)
+      },
+      false,
+      () => {
         this.storage.manifest = manifest
-        await this.storage.stageSnapshotRecords(snapshot.records, executor)
-        await this.storage.clearCanonicalRelations(executor, changed)
-        await this.storage.ingestSnapshotRecords(
-          snapshot.records,
-          executor,
-          changed,
-        )
-        await this.storage.ingestSnapshotRelationSets(
-          snapshot.relationSets,
-          executor,
-          changed,
-        )
-        for (const entry of await this.storage.pending(executor))
-          if (
-            ['pending', 'sending', 'conflicted', 'rejected'].includes(
-              entry.status,
-            )
-          ) {
-            const record = await this.storage.findStored(
-              entry.operation.model,
-              entry.operation.localIdentity,
-              executor,
-            )
-            if (record?.serverIdentity === null)
-              await this.storage.persist(
-                { ...record, visible: true },
-                executor,
-                changed,
-              )
-          }
-        await this.storage.applyPendingDeleteEffects(executor, changed)
-        await this.storage.rebuildRelationOverlays(executor, changed)
-        await this.storage.setMetadata(
-          'manifest',
-          canonicalJson(manifest),
-          executor,
-        )
-        await this.storage.setMetadata(
-          `cursor:${requestedDataset}`,
-          snapshot.cursor,
-          executor,
-        )
-        await this.storage.setMetadata(
-          'scope',
-          canonicalJson(snapshot.scope),
-          executor,
-        )
-        changed.add('*')
-      } catch (error) {
-        this.storage.manifest = current
-        throw error
-      }
-    })
+      },
+    )
     return true
   }
   private verifySnapshot(snapshot: Snapshot): Promise<DigestLifecycle> {

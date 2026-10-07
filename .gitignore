@@ -57,3 +57,8 @@ CLAUDE.md
 # Operating system files
 .DS_Store
 Thumbs.db
+
+# Machine-specific native configuration
+**/.xcode.env.local
+.project
+*.xcuserstate

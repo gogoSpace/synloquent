@@ -160,6 +160,13 @@ export class Storage {
     this.manifest = configuration.schema
     this.session = configuration.session
   }
+  withManifest(manifest: Manifest): Storage {
+    const scoped = new Storage(this.configuration, this.owner)
+    scoped.manifest = manifest
+    scoped.session = this.session
+    scoped.partitionKey = this.partitionKey
+    return scoped
+  }
   get partitionIdentity(): string {
     return canonicalJson([
       this.session.accountId,

@@ -1,116 +1,88 @@
-# Installation and local example
+# Install and run locally
 
-The repository contains local Composer and npm archives and pinned example applications. The archive identities are in [distribution.json](../../artifacts/packages/distribution.json). They are not registry releases.
+The `0.1.0` beta includes matching Composer and npm archives. Neither package needs a registry publication to run the example. Keep the directory layout intact because the example locks use relative archive paths. The archive filenames and SHA-256 values are in [distribution.json](../../artifacts/packages/distribution.json).
 
-## Install the locked dependencies
+## Prerequisites
 
-Use PHP 8.4 with PDO PostgreSQL, Composer 2, PostgreSQL 18 and Node 22. Android additionally needs JDK 21 and the Android SDK. iOS needs macOS, Xcode and CocoaPods. Set `JAVA_HOME` to your installed JDK. On macOS, `/usr/libexec/java_home -v 21` can locate it.
+Use PHP 8.4 with Composer 2 and PDO MySQL for MariaDB, or PDO PostgreSQL for PostgreSQL. The example pins Laravel 13.34.0. Server archive installation is also tested on Laravel 12.55.1. Use Node 22.13 or later in the 22 series, React Native 0.87.1 and the exact native dependency lockfiles.
 
-Run from the repository root:
+Android requires JDK 21, the Android SDK and an emulator. The checked-in Gradle wrapper downloads its pinned Gradle version if needed. Configure `ANDROID_HOME`, put its platform tools on PATH, and create an emulator in Android Studio. iOS requires macOS, Xcode with an installed simulator runtime and CocoaPods. No physical device or signing account is needed for the simulator walkthrough.
+
+## Install the example
+
+Run these commands from the repository root:
 
 ```sh
-mkdir -p examples/laravel/bootstrap/cache examples/laravel/storage/logs
-mkdir -p examples/laravel/storage/framework/cache examples/laravel/storage/framework/sessions examples/laravel/storage/framework/views
 npm ci --ignore-scripts --no-audit --no-fund
-composer install --working-dir=packages/laravel --no-interaction --prefer-dist
+php scripts/setup-example.php
 composer install --working-dir=examples/laravel --no-interaction --prefer-dist
 npm ci --prefix=examples/react-native --no-audit --no-fund
-node scripts/repair_rn_types.mjs
-npm run build
 ```
 
-The declaration repair applies three exact TypeScript fixes to the pinned React Native package. It rejects other versions or unexpected declaration content. It does not disable type checking.
+The setup command creates writable Laravel directories and a fresh `.env` with random application and cursor secrets. It preserves an existing configuration. The native install applies the documented locked React Native declaration repairs through its postinstall script. Both examples install actual package archives, without source symlinks.
 
-## Create an isolated PostgreSQL cluster
+## Create a dedicated database
 
-The commands below use only disposable synthetic data. They create a new cluster in `.local/postgres`, listen on loopback port `55433` and use local trust authentication. This is a development configuration, not a production database setup. Put `initdb`, `pg_ctl`, `createdb`, `dropdb` and `psql` on PATH.
+Use a local MariaDB 11.7.2 installation and create a new database and local account using your database administrator credentials. For example, in the MariaDB client:
 
-Choose another free port if `55433` is occupied, and update the public environment template and all database commands consistently. The example selects PostgreSQL in its configuration and does not read `DB_CONNECTION`.
-
-The first-run block refuses an existing environment file or data directory. Preserve an existing installation and use the restart procedure instead.
-
-```sh
-(
-  set -eu
-  example_database_directory="$(pwd)/.local/postgres"
-  test ! -e examples/laravel/.env
-  test ! -e "$example_database_directory"
-  cp examples/laravel/.env.example examples/laravel/.env
-  php examples/laravel/artisan key:generate --no-interaction
-  php -r '$environmentPath = "examples/laravel/.env"; $environmentContents = file_get_contents($environmentPath); $environmentContents = preg_replace("/^SYNLOQUENT_CURSOR_SECRET=$/m", "SYNLOQUENT_CURSOR_SECRET=".bin2hex(random_bytes(32)), $environmentContents, 1, $replacementCount); if ($replacementCount !== 1) { throw new RuntimeException("Expected one empty cursor secret in the fresh environment."); } file_put_contents($environmentPath, $environmentContents);'
-  mkdir -p "$example_database_directory"
-  initdb --pgdata="$example_database_directory/data" --username=postgres --auth-local=trust --auth-host=trust --encoding=UTF8 --locale=C
-  pg_ctl --pgdata="$example_database_directory/data" --log="$example_database_directory/postgres.log" --options="-h 127.0.0.1 -p 55433 -c timezone=UTC -k ''" --wait start
-  createdb --host=127.0.0.1 --port=55433 --username=postgres synloquent_example
-  php examples/laravel/artisan migrate --force --no-interaction
-  php examples/laravel/artisan synloquent:seed-example --no-interaction
-  php examples/laravel/artisan synloquent:doctor --no-interaction
-  php examples/laravel/artisan synloquent:generate --output=examples/react-native/backend.generated.ts
-  php examples/laravel/artisan synloquent:generate --output=examples/react-native/backend.generated.ts --check
-)
+```sql
+CREATE DATABASE synloquent_example CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'synloquent_example'@'127.0.0.1' IDENTIFIED BY 'replace-with-your-local-password';
+GRANT ALL PRIVILEGES ON synloquent_example.* TO 'synloquent_example'@'127.0.0.1';
 ```
 
-Package migrations load automatically through the service provider. Publish `synloquent-migrations` only if your host deliberately takes ownership of migration deployment. `synloquent:seed-example` creates the synthetic domain. The generator produces `backendSchema`, `BackendModels`, `BackendCommands` and `BackendScopes` in one file.
+Set the same credentials in `examples/laravel/.env`. Its defaults select `DB_CONNECTION=mariadb`, host `127.0.0.1`, port `3306` and database `synloquent_example`. Package and example migrations require InnoDB and UTC. The included Laravel connection sets both.
 
-## Start Laravel and React Native
+For PostgreSQL 18.3, create a dedicated database and user, select `DB_CONNECTION=pgsql`, set `DB_PORT=5432` or your local port, and enter that database's credentials. The included PostgreSQL connection uses UTC. Generate the bindings from whichever engine you choose. Index metadata can differ between engines, which changes the schema fingerprint.
 
-In one terminal:
+Never point example migrations, seed commands or development tests at a production database. Do not run the initial setup against an unrelated application's schema.
+
+## Start Laravel
 
 ```sh
+php examples/laravel/artisan migrate --force
+php examples/laravel/artisan synloquent:seed-example
+php examples/laravel/artisan synloquent:doctor
+php examples/laravel/artisan synloquent:generate --output=examples/react-native/backend.generated.ts
+php examples/laravel/artisan synloquent:generate --output=examples/react-native/backend.generated.ts --check
 php examples/laravel/artisan serve --host=127.0.0.1 --port=8769
 ```
 
-Check the host from another terminal:
+The doctor should report the chosen database and a ready schema. Package migrations load automatically. The seed creates demonstration users, products, categories and related catalog data. `synloquent:generate` writes one deterministic TypeScript file. After changing it, rebuild the native application or reload the development bundle.
+
+Keep the HTTP terminal open. `curl --fail http://127.0.0.1:8769/up` checks startup. If the port is occupied, use a free port and update `APP_URL` and both platform URLs in `examples/react-native/src/Demo.tsx` consistently.
+
+## Run React Native
+
+Start Metro in another terminal:
 
 ```sh
-curl --fail http://127.0.0.1:8769/up
+npm start --prefix=examples/react-native
 ```
 
-This checks HTTP startup, not synchronization. The ordinary example uses `http://10.0.2.2:8769` on Android and `http://127.0.0.1:8769` on the iOS simulator. If that HTTP port is unavailable, change the endpoint in `examples/react-native/src/Demo.tsx` as well as `APP_URL`. Changing `APP_URL` alone does not alter the mobile endpoint.
-
-Prepare iOS pods once:
+With an Android emulator running:
 
 ```sh
-(cd examples/react-native/ios && USE_HERMES=1 pod install)
+npm run android --prefix=examples/react-native
 ```
 
-Start Metro in its own terminal:
+For iOS, install the pinned pods and launch the simulator application:
 
 ```sh
-cd examples/react-native
-npm run start
+(cd examples/react-native/ios && pod install)
+npm run ios --prefix=examples/react-native
 ```
 
-Start a selected platform in another terminal:
+Android emulator networking uses `http://10.0.2.2:8769`, and the iOS simulator uses `http://127.0.0.1:8769`. The example only allows local HTTP. Other deployments need HTTPS and a real authentication provider.
 
-```sh
-cd examples/react-native
-npm run android
-```
+Follow the [offline walkthrough](../../examples/react-native/README.md). Stop the Laravel terminal to exercise offline edits. Force-stop and relaunch the app without uninstalling it or clearing its data. Restart Laravel before pressing Sync. Stopping Metro during a Debug build is different from a self-contained Release application. Use a Release build when you want to test startup with no development server.
 
-For iOS, use `npm run ios` instead. Follow the [offline walkthrough](../../examples/react-native/README.md) after startup. Keep Metro or an installed JavaScript bundle available during offline testing.
+On completion, stop Metro and Laravel with Ctrl-C and shut down your test emulator or simulator. Keep the dedicated database to resume later, or drop only that database and its demonstration account when you no longer need them. Preserve the generated secrets when keeping the database.
 
-## Restart and cleanup
+## Install in another application
 
-Keep `.env`, its keys, the application database and the PostgreSQL directory for another session. Do not repeat `initdb`, secret generation or `migrate:fresh` for a retained installation.
+For Laravel, use Composer's artifact repository pointing to a directory containing the server ZIP, then require `synloquent/laravel:0.1.0`. PHP's ZIP support must be available. Alternatively, copy the explicit package repository metadata from the included example and adjust its local `dist.url`. Register export classes, an authenticated actor resolver and policies as described in the [Laravel guide](laravel.md). Normal Composer discovery loads the provider.
 
-After stopping your HTTP server, stop only the cluster created above:
+For React Native, install the client TGZ from its actual filename in `distribution.json`, together with the pinned native peers. Run CocoaPods and the normal Android build. Import `createReactNativeClient` from `@synloquent/client/react-native`, supply your generated schema, stable session, secure unique identity function and request-bound authentication. Use `runtime.setSession()` and `runtime.close()` to coordinate transport cancellation with database ownership. See the [client package example](../../packages/client/README.md).
 
-```sh
-example_database_directory="$(pwd)/.local/postgres"
-pg_ctl --pgdata="$example_database_directory/data" --mode=fast --wait stop
-```
-
-Restart it with the same `pg_ctl start` command. To delete the disposable database, run `dropdb` while that cluster is running, then stop it:
-
-```sh
-dropdb --host=127.0.0.1 --port=55433 --username=postgres synloquent_example
-```
-
-## Install into another application
-
-Install the Composer archive through a Composer artifact repository. Register export classes, an authenticated actor resolver and the host capture contract. See the [Laravel guide](laravel.md).
-
-Install the npm archive and the pinned optional React Native peers, then run CocoaPods and normal Android autolinking. Supply generated schema, authentication, session and identity generation through the public factory described in the [client guide](client.md).
-
-The small example has passed offline edits, restart persistence and explicit synchronization on two emulator platforms. This does not establish production authentication, physical-device compatibility, relations or large-catalog performance. The exact current public installation sequence remains a clean-install roadmap item.
+Do not rebuild or repack the supplied packages merely to install them. Package development and archive updates are described in [development and testing](../development.md).

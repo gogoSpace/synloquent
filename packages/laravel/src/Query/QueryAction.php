@@ -30,8 +30,14 @@ final class QueryAction
             throw new ProtocolException('unsupported_query', 'Query must own its consistent read transaction.');
         }
 
-        return $connection->transaction(function () use ($connection, $definition, $actor): array {
+        if ($connection->getDriverName() !== 'pgsql') {
             $connection->statement('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY');
+        }
+
+        return $connection->transaction(function () use ($connection, $definition, $actor): array {
+            if ($connection->getDriverName() === 'pgsql') {
+                $connection->statement('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY');
+            }
 
             return $this->read($definition, $actor);
         });
@@ -111,7 +117,12 @@ final class QueryAction
         unset($base['aggregate'], $base['groupBy'], $base['having'], $base['include'], $base['select'], $base['orderBy'], $base['limit'], $base['offset']);
         $query = $this->compiler->compile($base, $actor)->reorder();
         $grammar = $query->getQuery()->getGrammar();
-        $expression = $function.'('.($field === '*' ? '*' : $grammar->wrap($query->getModel()->qualifyColumn($field))).')';
+        $hasUnions = ($base['unions'] ?? []) !== [];
+        $aggregateColumn = $field === '*' ? '*' : $grammar->wrap($hasUnions ? $field : $query->getModel()->qualifyColumn($field));
+        if (($this->manifest->build()['models'][$definition['model']]['fields'][$field]['type'] ?? null) === 'string') {
+            $aggregateColumn = QueryExpressions::text($aggregateColumn, $grammar);
+        }
+        $expression = $function.'('.$aggregateColumn.')';
         $aggregate = [];
         if (isset($definition['groupBy'])) {
             $groups = $definition['groupBy'];
@@ -123,15 +134,31 @@ final class QueryAction
                     throw new ProtocolException('unknown_field', 'Grouping field must be a readable physical field.');
                 }
             }
-            $columns = array_map($query->getModel()->qualifyColumn(...), $groups);
-            $query->select($columns)->selectRaw($expression.' AS aggregate_value')->groupBy($columns);
+            $query->select([]);
+            foreach (array_unique([...$groups, ...($field === '*' ? [] : [$field])]) as $projected) {
+                $column = $grammar->wrap($hasUnions ? $projected : $query->getModel()->qualifyColumn($projected));
+                if ($this->manifest->build()['models'][$definition['model']]['fields'][$projected]['type'] === 'string') {
+                    $column = QueryExpressions::text($column, $grammar);
+                }
+                $query->selectRaw($column.' AS '.$grammar->wrap($projected));
+            }
+            if ($groups === [] && $field === '*') {
+                $query->selectRaw('1 AS __synloquent_group_source');
+            }
+            $model = $query->getModel();
+            $query = $model->newModelQuery()->fromSub($query->toBase()->cloneWithout(['limit', 'offset', 'unionLimit', 'unionOffset']), '__synloquent_groups');
+            foreach ($groups as $group) {
+                $query->addSelect($group)->groupBy($group);
+            }
+            $expression = $function.'('.($field === '*' ? '*' : $grammar->wrap($field)).')';
+            $query->selectRaw($expression.' AS aggregate_value');
             if ($function === 'avg' && ($this->manifest->build()['models'][$definition['model']]['fields'][$field]['type'] ?? null) === 'integer') {
-                $query->selectRaw('sum('.$grammar->wrap($query->getModel()->qualifyColumn($field)).') AS aggregate_sum');
+                $query->selectRaw('sum('.$grammar->wrap($field).') AS aggregate_sum');
             }
             if (isset($definition['having'])) {
                 $fields = array_intersect_key($this->manifest->build()['models'][$definition['model']]['fields'], array_fill_keys($groups, true));
                 foreach ($fields as $group => &$declaration) {
-                    $declaration['column'] = $query->getModel()->qualifyColumn($group);
+                    $declaration['column'] = $group;
                 }
                 unset($declaration);
                 [$sql, $bindings] = $this->having->compile($definition['having'], $fields, $expression, $grammar);
@@ -148,19 +175,13 @@ final class QueryAction
                 if (! in_array($group, $groups, true) || ! in_array($direction, ['asc', 'desc'], true)) {
                     throw new ProtocolException('unsupported_query', 'Grouped order requires a declared group field.');
                 }
-                $column = $grammar->wrap($query->getModel()->qualifyColumn($group));
-                if ($this->manifest->build()['models'][$definition['model']]['fields'][$group]['type'] === 'string') {
-                    $column .= ' COLLATE "C"';
-                }
-                $query->orderByRaw($column.' '.$direction.($direction === 'asc' ? ' NULLS FIRST' : ' NULLS LAST'));
+                $column = $grammar->wrap($group);
+                $query->orderByRaw(QueryExpressions::order($column, $direction, $grammar));
                 $ordered[] = $group;
             }
             foreach (array_diff($groups, $ordered) as $group) {
-                $column = $grammar->wrap($query->getModel()->qualifyColumn($group));
-                if ($this->manifest->build()['models'][$definition['model']]['fields'][$group]['type'] === 'string') {
-                    $column .= ' COLLATE "C"';
-                }
-                $query->orderByRaw($column.' ASC NULLS FIRST');
+                $column = $grammar->wrap($group);
+                $query->orderByRaw(QueryExpressions::order($column, 'asc', $grammar));
             }
             $aggregate = ['value' => null, 'groups' => []];
             $maximum = (int) config('synloquent.max_page_size', 1000);
@@ -184,7 +205,7 @@ final class QueryAction
             if (isset($definition['having'])) {
                 throw new ProtocolException('unsupported_query', 'HAVING requires a grouped query.');
             }
-            $value = $query->{$function}($field);
+            $value = $query->{$function}($query->getQuery()->raw($aggregateColumn));
             $sum = $function === 'avg' && ($this->manifest->build()['models'][$definition['model']]['fields'][$field]['type'] ?? null) === 'integer' ? (clone $query)->sum($field) : null;
             $aggregate = ['value' => $this->aggregateValue($value, $function, $field, $definition['model'], $sum)];
         }

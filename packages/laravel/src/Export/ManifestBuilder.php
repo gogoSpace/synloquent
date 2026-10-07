@@ -118,7 +118,7 @@ final class ManifestBuilder
         $type = match ($castType) {
             'int', 'integer' => 'integer', 'bool', 'boolean' => 'boolean', 'float', 'double', 'real' => 'float', 'decimal' => 'decimal', 'string' => 'string', 'date', 'immutable_date' => 'date', 'datetime', 'immutable_datetime', 'timestamp' => 'datetime', 'array', 'json', 'object', 'collection' => 'json',
             '' => match ($column['type_name'] ?? '') {
-                'int2', 'int4', 'int8', 'integer', 'bigint', 'smallint' => 'integer', 'bool', 'boolean' => 'boolean', 'float4', 'float8', 'real', 'double' => 'float', 'numeric', 'decimal' => 'decimal', 'date' => 'date', 'timestamp', 'timestamptz', 'datetime' => 'datetime', 'json', 'jsonb' => 'json', 'varchar', 'char', 'bpchar', 'text', 'uuid' => 'string',
+                'int', 'tinyint', 'mediumint', 'int2', 'int4', 'int8', 'integer', 'bigint', 'smallint' => 'integer', 'bool', 'boolean' => 'boolean', 'float', 'float4', 'float8', 'real', 'double' => 'float', 'numeric', 'decimal' => 'decimal', 'date' => 'date', 'timestamp', 'timestamptz', 'datetime' => 'datetime', 'json', 'jsonb' => 'json', 'varchar', 'char', 'bpchar', 'text', 'tinytext', 'mediumtext', 'uuid' => 'string',
                 default => throw new ProtocolException('schema_mismatch', 'Declare field type for '.$name),
             },
             default => throw new ProtocolException('schema_mismatch', 'Declare read-only materialized type for custom cast '.$name),
@@ -239,7 +239,7 @@ final class ManifestBuilder
         }
         foreach ($query->getQuery()->columns ?? [] as $column) {
             $expression = $column instanceof Expression ? $column->getValue($query->getQuery()->getGrammar()) : $column;
-            if (preg_match('/^(min|max)\([^)]*"([A-Za-z_][A-Za-z0-9_]*)"\)\s+as\s+/i', $expression, $match)) {
+            if (preg_match('/^(min|max)\([^)]*["`]([A-Za-z_][A-Za-z0-9_]*)["`]\)\s+as\s+/i', $expression, $match)) {
                 $sequence[] = ['field' => $match[2], 'aggregate' => strtolower($match[1])];
                 break;
             }

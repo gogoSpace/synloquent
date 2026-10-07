@@ -2,53 +2,7 @@
 
 Synloquent queries an authorized SQLite projection and records durable mutation intents. The Laravel package decides authorization, validation, canonical values and revisions. Generate the schema and TypeScript bindings from the host application before creating a client. The core package imports no React, React Native, Node or DOM runtime APIs.
 
-## React Native configuration
-
-Use the composed factory for the ordinary React Native path. The application supplies an authenticated session, request-bound credentials and secure unique identity generation. Its installed native modules must match the pinned versions in [installation](installation.md).
-
-```ts
-import type { Session } from '@synloquent/client'
-import {
-  createReactNativeClient,
-  type ReactNativeHttpConfiguration,
-} from '@synloquent/client/react-native'
-import {
-  backendSchema,
-  type BackendModels,
-  type BackendCommands,
-  type BackendScopes,
-} from './backend.generated'
-
-export function openCatalog(
-  session: Session,
-  authenticate: ReactNativeHttpConfiguration['authenticate'],
-  generateIdentity: () => string,
-) {
-  return createReactNativeClient<BackendModels, BackendCommands, BackendScopes>(
-    {
-      schema: backendSchema,
-      database: { name: 'catalog.sqlite' },
-      session,
-      generateIdentity,
-      http: {
-        endpoint: 'https://api.example.com/synloquent/v1/protocol',
-        authenticate,
-        timeoutMilliseconds: 30000,
-      },
-    },
-  )
-}
-```
-
-Await `openCatalog(...)` and use `runtime.client` for reads and writes. Keep one runtime per application database owner rather than opening it during each render. Call `await runtime.setSession(nextSession)` when the authenticated account changes and `await runtime.close()` when that owner is disposed.
-
-The authentication callback returns `{ session, headers }` for the immutable request identity. It must bind credentials to the exact account, tenant, device, device epoch and generation. The Laravel host resolves and authorizes the actor independently. See [host configuration](laravel.md) and the complete [synthetic example](../../examples/react-native/src/Demo.tsx).
-
-## Advanced manual composition
-
-The lower-level factory below is for applications that already provide their own transport, clock, secure identity generator, scheduling boundary and native crypto configuration. These are injected application services, not globals supplied by the package. The composed factory above supplies the ordinary platform integration.
-
-### Open one database owner
+## Open one database owner
 
 For a React Native application, install the local client archive named in `artifacts/packages/distribution.json` and the selected optional peers. Replace the absolute checkout path below with your own path and use the archive identity recorded in that file. The package is not published to a registry. Run these commands from your RN application's root. The optional native crypto entrypoint is part of this package and autolinks into the host application.
 
@@ -99,7 +53,7 @@ The optional SQLite entrypoint opens the named native database. `DatabaseAdapter
 
 The injected transport implements `manifest`, `query`, `push`, `pull`, `snapshot` and `command`. It adds credentials, performs HTTP requests and validates protocol envelopes. The server authenticates the actor independently of the session's account identifier. Never use a shared unauthenticated snapshot URL as an authorization boundary.
 
-The native crypto provider hashes exact UTF-8 bytes with system SHA256 on a serial native worker. It uses bounded buffers and accepts the application's measured scheduling boundary. Supply a fair `yieldToApplication` implementation and use the same scheduling policy during large imports. On bridgeless React Native, a zero-delay timer can wait for a frame. The React Native composition uses the application scheduler. Pure JavaScript hash implementations remain useful for small fixtures and independent correctness checks.
+The native crypto provider hashes exact UTF-8 bytes with system SHA256 on a serial native worker. It uses bounded buffers and accepts the application's measured scheduling boundary. Supply a fair `yieldToApplication` implementation and use the same scheduling policy during large imports. On bridgeless React Native, a zero-delay timer can wait for a frame. The qualified example uses the supported native scheduler and records full application frame coverage. Pure JavaScript hash implementations remain useful for small fixtures and independent correctness checks.
 
 ## Read and query
 
@@ -148,7 +102,7 @@ Use `allowPartial` only when a partial answer is acceptable. Complete-set pivot 
 ## Drafts and durable writes
 
 ```ts
-const draft = client.models.Item.new({ title: 'Offline stamp' })
+const draft = client.models.Item.new({ title: 'Offline product' })
 draft.fill({ quantity: 1, price: '12.50' })
 await draft.save()
 await client.sync.flush()
@@ -254,6 +208,8 @@ subscription.dispose()
 
 The snapshot object remains stable between committed updates. Subscriptions publish committed query results. Last unsubscribe detaches the database listener, and `dispose` permanently releases the subscription. Dispose application-owned subscriptions when logging out. Database replacement invalidates old model instances and refreshes observed membership. Observe a model with a query constrained to its identity. The optional React entrypoint exposes `useSynloquentQuery`, cleans up on unmount and accepts generated client bindings. `Query.observationKey` includes its AST, execution mode, partial opt-in and current schema fingerprint. The hook observes the original query, preserving `.remote()` and `.allowPartial()`. React and native modules are absent from the core entrypoint.
 
-## Verification and limits
+## Limits
 
-`npm test` runs actual SQLite unit and recovery scenarios, including process death before and after commit. `packages/client/tests/capability-scenarios.ts` exports named per-method scenarios reused against an independent SQLite fixture and real Laravel HTTP. The shared protocol corpus defines independent query results. Native qualification runs the packed public SDK on both iOS and Android with Hermes.
+The native example uses the packed public SDK with Hermes and asynchronous OP-SQLite on Android and iOS. Node SQLite tests cover core behavior, but do not establish native timing or memory behavior. Large-import performance remains a beta limitation. Native fetch buffers the HTTP response before parsing and validation. Use representative application data to measure your own memory and responsiveness requirements.
+
+See [compatibility](compatibility.md) for the supported versions and database boundaries, and [development](../development.md) for reproducible checks.

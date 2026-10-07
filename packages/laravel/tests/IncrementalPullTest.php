@@ -38,9 +38,9 @@ final class IncrementalPullTest extends TestCase
         $this->assertSame([], $result['batches']);
         $this->assertCount(5, $queries);
         foreach ($queries as $query) {
-            $this->assertStringNotContainsString('"items"', $query['query']);
-            $this->assertStringNotContainsString('"synloquent_projection_memberships"', $query['query']);
-            $this->assertStringNotContainsString('"membership"', $query['query']);
+            $this->assertStringNotContainsString(DB::connection()->getQueryGrammar()->wrapTable('items'), $query['query']);
+            $this->assertStringNotContainsString(DB::connection()->getQueryGrammar()->wrapTable('synloquent_projection_memberships'), $query['query']);
+            $this->assertStringNotContainsString(DB::connection()->getQueryGrammar()->wrap('membership'), $query['query']);
         }
     }
 

@@ -51,10 +51,7 @@ final class RevisionStore
 
     public function advance(string $stream, string $model, string $identity): string
     {
-        $revision = (int) $this->get($stream, $model, $identity) + 1;
-        $this->database->connection()->table('synloquent_revisions')->updateOrInsert(['stream' => $stream, 'model' => $model, 'identity' => $identity], ['revision' => $revision]);
-
-        return (string) $revision;
+        return $this->advanceMany($stream, [['model' => $model, 'identity' => $identity]])[$model.':'.$identity];
     }
 
     /**
@@ -65,15 +62,18 @@ final class RevisionStore
     {
         $revisions = [];
         $connection = $this->database->connection();
-        $table = $connection->getQueryGrammar()->wrapTable('synloquent_revisions');
+        if ($connection->transactionLevel() === 0) {
+            return $connection->transaction(fn (): array => $this->advanceMany($stream, $identities));
+        }
+        $grammar = $connection->getQueryGrammar();
         foreach (array_chunk($identities, 1000) as $chunk) {
-            $bindings = [];
-            foreach ($chunk as $identity) {
-                array_push($bindings, $stream, $identity['model'], $identity['identity']);
-            }
-            $sql = 'INSERT INTO '.$table.' AS revision_rows (stream, model, identity, revision) VALUES '.implode(', ', array_fill(0, count($chunk), '(?, ?, ?, 1)')).' ON CONFLICT (stream, model, identity) DO UPDATE SET revision = revision_rows.revision + 1 RETURNING model, identity, revision';
-            foreach ($connection->selectFromWriteConnection($sql, $bindings) as $row) {
-                $revisions[$row->model.':'.$row->identity] = (string) $row->revision;
+            $rows = array_map(static fn (array $identity): array => ['stream' => $stream, 'model' => $identity['model'], 'identity' => $identity['identity'], 'revision' => 1], $chunk);
+            $connection->table('synloquent_revisions')->upsert($rows, ['stream', 'model', 'identity'], ['revision' => $connection->raw($grammar->wrap('synloquent_revisions.revision').' + 1')]);
+            foreach (array_unique(array_column($chunk, 'model')) as $model) {
+                $keys = array_column(array_filter($chunk, static fn (array $identity): bool => $identity['model'] === $model), 'identity');
+                foreach ($connection->table('synloquent_revisions')->where(['stream' => $stream, 'model' => $model])->whereIn('identity', $keys)->get(['model', 'identity', 'revision']) as $row) {
+                    $revisions[$row->model.':'.$row->identity] = (string) $row->revision;
+                }
             }
         }
 

@@ -155,10 +155,13 @@ final class WriteContextTest extends TestCase
 
     public function test_soft_delete_stages_only_native_written_columns_and_discards_unsaved_owner_key_edits(): void
     {
-        Schema::table('notes', fn (Blueprint $table) => $table->unique('body'));
+        Schema::table('notes', function (Blueprint $table): void {
+            $table->string('body')->change();
+            $table->unique('body');
+        });
         Schema::create('fixture_context_note_dependents', function (Blueprint $table): void {
             $table->id();
-            $table->text('note_body');
+            $table->string('note_body');
             $table->foreign('note_body')->references('body')->on('notes')->cascadeOnUpdate();
         });
         try {

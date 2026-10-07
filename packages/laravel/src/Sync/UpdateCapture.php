@@ -73,7 +73,7 @@ final class UpdateCapture
                         continue;
                     }
                     $child = $this->registeredModel($foreignKey['schema'], $foreignKey['table']);
-                    if ($child === null || $foreignKey['on_update'] !== 'c') {
+                    if ($child === null || $foreignKey['on_update'] !== 'cascade') {
                         $table = $this->database->connection()->getQueryGrammar()->wrapTable($foreignKey['schema'].'.'.$foreignKey['table'], '');
                         $query = $this->database->connection()->query()->fromRaw($table);
                         if ($this->matchParents($query, $foreignKey, $parents) && $query->exists()) {
@@ -225,8 +225,10 @@ final class UpdateCapture
     private function foreignKeys(string $table): array
     {
         if (! isset($this->incoming[$table])) {
-            $reference = $this->database->connection()->getQueryGrammar()->wrapTable($table);
-            $rows = $this->database->connection()->selectFromWriteConnection(<<<'SQL'
+            $connection = $this->database->connection();
+            if ($connection->getDriverName() === 'pgsql') {
+                $reference = $this->database->connection()->getQueryGrammar()->wrapTable($table);
+                $rows = $this->database->connection()->selectFromWriteConnection(<<<'SQL'
 SELECT child_schema.nspname AS schema, child.relname AS table,
        constraint_row.confupdtype AS on_update,
        json_agg(child_column.attname ORDER BY key_position.ordinality) AS columns,
@@ -242,7 +244,30 @@ WHERE constraint_row.contype = 'f' AND constraint_row.confrelid = to_regclass(?)
 GROUP BY constraint_row.oid, child_schema.nspname, child.relname, constraint_row.confupdtype
 ORDER BY child_schema.nspname, child.relname, constraint_row.oid
 SQL, [$reference]);
-            $this->incoming[$table] = array_map(static fn (object $row): array => ['schema' => $row->schema, 'table' => $row->table, 'columns' => json_decode($row->columns, true, flags: JSON_THROW_ON_ERROR), 'foreign_columns' => json_decode($row->foreign_columns, true, flags: JSON_THROW_ON_ERROR), 'on_update' => $row->on_update], $rows);
+                $this->incoming[$table] = array_map(static fn (object $row): array => ['schema' => $row->schema, 'table' => $row->table, 'columns' => json_decode($row->columns, true, flags: JSON_THROW_ON_ERROR), 'foreign_columns' => json_decode($row->foreign_columns, true, flags: JSON_THROW_ON_ERROR), 'on_update' => match ($row->on_update) {
+                    'c' => 'cascade', 'n' => 'set null', 'd' => 'set default', default => throw new ProtocolException('schema_mismatch', 'Unknown foreign key update action.')
+                }], $rows);
+            } else {
+                $builder = $connection->getSchemaBuilder();
+                [$schema, $name] = $builder->parseSchemaAndTable($table);
+                $rows = $connection->query()->fromRaw($connection->getQueryGrammar()->wrapTable('information_schema.KEY_COLUMN_USAGE', '').' AS '.$connection->getQueryGrammar()->wrapTable('keys'))
+                    ->join($connection->raw($connection->getQueryGrammar()->wrapTable('information_schema.REFERENTIAL_CONSTRAINTS', '').' AS '.$connection->getQueryGrammar()->wrapTable('constraints')), function ($join): void {
+                        $join->on('constraints.CONSTRAINT_SCHEMA', '=', 'keys.CONSTRAINT_SCHEMA')->on('constraints.CONSTRAINT_NAME', '=', 'keys.CONSTRAINT_NAME')->on('constraints.TABLE_NAME', '=', 'keys.TABLE_NAME');
+                    })
+                    ->where('keys.REFERENCED_TABLE_SCHEMA', $schema ?? $builder->getCurrentSchemaName())
+                    ->where('keys.REFERENCED_TABLE_NAME', $connection->getTablePrefix().$name)
+                    ->whereIn('constraints.UPDATE_RULE', ['CASCADE', 'SET NULL', 'SET DEFAULT'])
+                    ->orderBy('keys.TABLE_SCHEMA')->orderBy('keys.TABLE_NAME')->orderBy('keys.CONSTRAINT_NAME')->orderBy('keys.ORDINAL_POSITION')
+                    ->get(['keys.TABLE_SCHEMA as schema', 'keys.TABLE_NAME as table', 'keys.CONSTRAINT_NAME as constraint_name', 'keys.COLUMN_NAME as column_name', 'keys.REFERENCED_COLUMN_NAME as foreign_column', 'constraints.UPDATE_RULE as on_update']);
+                $constraints = [];
+                foreach ($rows as $row) {
+                    $key = $row->schema.'.'.$row->table.'.'.$row->constraint_name;
+                    $constraints[$key] ??= ['schema' => $row->schema, 'table' => $row->table, 'columns' => [], 'foreign_columns' => [], 'on_update' => strtolower($row->on_update)];
+                    $constraints[$key]['columns'][] = $row->column_name;
+                    $constraints[$key]['foreign_columns'][] = $row->foreign_column;
+                }
+                $this->incoming[$table] = array_values($constraints);
+            }
         }
 
         return $this->incoming[$table];

@@ -222,6 +222,7 @@ export class DatabaseOwner {
       changed: Set<string>,
     ) => Promise<Result>,
     reclaimFreePages = false,
+    afterCommit?: () => void,
   ): Promise<Result> {
     await Promise.allSettled(
       this.cancelDigests(
@@ -237,6 +238,7 @@ export class DatabaseOwner {
         (executor) => callback(executor, changed),
         'write',
       )
+      afterCommit?.()
       this.generationValue += 1
       for (const listener of this.listeners)
         listener(changed, this.generationValue)

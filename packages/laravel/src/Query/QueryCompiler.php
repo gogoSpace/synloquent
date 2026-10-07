@@ -134,7 +134,7 @@ final class QueryCompiler
                 continue;
             }
             $column = $model->qualifyColumn($field);
-            $selection[] = ($this->manifest->build()['models'][$resource->name()]['fields'][$field]['type'] ?? '') === 'json' ? $query->getQuery()->raw($query->getQuery()->getGrammar()->wrap($column).'::jsonb AS '.$query->getQuery()->getGrammar()->wrap($field)) : $column;
+            $selection[] = ($this->manifest->build()['models'][$resource->name()]['fields'][$field]['type'] ?? '') === 'json' && $model->getConnection()->getDriverName() === 'pgsql' ? $query->getQuery()->raw($query->getQuery()->getGrammar()->wrap($column).'::jsonb AS '.$query->getQuery()->getGrammar()->wrap($field)) : $column;
         }
         $query->addSelect($selection);
         if (isset($definition['where'])) {
@@ -151,7 +151,11 @@ final class QueryCompiler
                 throw new ProtocolException('unsupported_query', 'Distinct union combinations are not declared.');
             }
             $grammar = $query->getQuery()->getGrammar();
-            $partition = array_map(fn (string $field) => $grammar->wrap($model->qualifyColumn($field)), $definition['select'] ?? $resource->readable());
+            $partition = array_map(function (string $field) use ($grammar, $model, $resource): string {
+                $column = $grammar->wrap($model->qualifyColumn($field));
+
+                return $this->manifest->build()['models'][$resource->name()]['fields'][$field]['type'] === 'string' ? QueryExpressions::text($column, $grammar) : $column;
+            }, $definition['select'] ?? $resource->readable());
             if ($partition === [] || array_intersect($definition['select'] ?? $resource->readable(), $resource->materialized()) !== []) {
                 throw new ProtocolException('unsupported_query', 'Distinct requires declared physical projection fields.');
             }
@@ -159,6 +163,10 @@ final class QueryCompiler
             $representatives = $query->toBase()->cloneWithout(['columns', 'orders', 'limit', 'offset'])->cloneWithoutBindings(['select', 'order'])->select($primary)->selectRaw('ROW_NUMBER() OVER(PARTITION BY '.implode(', ', $partition).' ORDER BY '.$grammar->wrap($primary).' ASC) AS __distinct_row');
             $identities = $model->getConnection()->query()->fromSub($representatives, '__synloquent_distinct')->select($model->getKeyName())->where('__distinct_row', 1);
             $query->whereIn($primary, $identities);
+        }
+        $hasUnions = ($definition['unions'] ?? []) !== [];
+        if ($hasUnions) {
+            $query = $model->newModelQuery()->fromSub($query->toBase(), '__synloquent_union')->select('__synloquent_union.*');
         }
         $order = $definition['orderBy'] ?? [];
         if (! is_array($order) || count($order) > 10) {
@@ -169,15 +177,15 @@ final class QueryCompiler
             if (! in_array($ordering['direction'] ?? '', ['asc', 'desc'], true)) {
                 throw new ProtocolException('unsupported_query', 'Invalid order direction.');
             }
-            $column = ($definition['unions'] ?? []) !== [] ? $ordering['field'] : $model->qualifyColumn($ordering['field']);
+            $column = $hasUnions ? '__synloquent_union.'.$ordering['field'] : $model->qualifyColumn($ordering['field']);
             $wrapped = $query->getQuery()->getGrammar()->wrap($column);
-            if (($this->manifest->build()['models'][$resource->name()]['fields'][$ordering['field']]['type'] ?? '') === 'string' && ($definition['unions'] ?? []) === []) {
-                $wrapped .= ' COLLATE "C"';
+            if (($this->manifest->build()['models'][$resource->name()]['fields'][$ordering['field']]['type'] ?? '') === 'string') {
+                $wrapped = QueryExpressions::text($wrapped, $query->getQuery()->getGrammar());
             }
-            $query->orderByRaw($wrapped.' '.$ordering['direction'].($ordering['direction'] === 'asc' ? ' NULLS FIRST' : ' NULLS LAST'));
+            $query->orderByRaw(QueryExpressions::order($wrapped, $ordering['direction'], $query->getQuery()->getGrammar()));
         }
         if (! in_array($model->getKeyName(), array_column($order, 'field'), true)) {
-            $query->orderBy(($definition['unions'] ?? []) !== [] ? $model->getKeyName() : $model->qualifyColumn($model->getKeyName()));
+            $query->orderByRaw(QueryExpressions::order($this->comparisonColumn($query, $resource, $model->getKeyName(), $hasUnions ? '__synloquent_union' : null), 'asc', $query->getQuery()->getGrammar()));
         }
         if ($depth > $this->configuration->get('synloquent.max_query_depth', 8)) {
             throw new ProtocolException('unsupported_query', 'Include depth exceeded.');
@@ -283,7 +291,7 @@ final class QueryCompiler
         $fieldType = $fieldDefinition['type'];
         $field = $qualifier === null ? $query->getModel()->qualifyColumn($field) : $qualifier.'.'.$field;
         if ($fieldType === 'string') {
-            $field = $query->getQuery()->raw($query->getQuery()->getGrammar()->wrap($field).' COLLATE "C"');
+            $field = $query->getQuery()->raw(QueryExpressions::text($query->getQuery()->getGrammar()->wrap($field), $query->getQuery()->getGrammar()));
         }
         $operator = $predicate['operator'] ?? '';
         if ($kind === 'column') {
@@ -291,7 +299,7 @@ final class QueryCompiler
             if (! in_array($operator, ['=', '!=', '<', '<=', '>', '>='], true)) {
                 throw new ProtocolException('unsupported_query', 'Invalid column comparison.');
             }
-            $query->whereColumn($field, $operator, $qualifier === null ? $query->getModel()->qualifyColumn($predicate['otherField']) : $qualifier.'.'.$predicate['otherField']);
+            $query->whereColumn([[$field, $operator, $query->getQuery()->raw($this->comparisonColumn($query, $resource, $predicate['otherField'], $qualifier))]]);
 
             return;
         }
@@ -304,8 +312,7 @@ final class QueryCompiler
                 if ($fieldType !== 'json' || (! is_scalar($value) && $value !== null)) {
                     throw new ProtocolException('unsupported_query', 'JSON containment requires a declared JSON field and scalar value.');
                 }
-                $wrapped = $query->getQuery()->getGrammar()->wrap($field);
-                $query->whereRaw('jsonb_typeof('.$wrapped.'::jsonb) = ? AND '.$wrapped.'::jsonb @> ?::jsonb', ['array', json_encode([$value], JSON_THROW_ON_ERROR)]);
+                QueryExpressions::jsonContains($query, $field, $value);
                 break;
             case 'jsonPath':
                 if ($fieldType !== 'json' || ! is_array($value) || ! is_string($value['path'] ?? null) || ! array_key_exists('value', $value) || (! is_scalar($value['value']) && $value['value'] !== null) || ! preg_match('/^\$(?:\.[A-Za-z_][A-Za-z0-9_]*|\[\d+\])+$/D', $value['path'])) {
@@ -315,13 +322,7 @@ final class QueryCompiler
                 if (count($matches[0]) > 16) {
                     throw new ProtocolException('unsupported_query', 'JSON path complexity exceeded.');
                 }
-                $wrapped = $query->getQuery()->getGrammar()->wrap($field);
-                $segments = [];
-                foreach ($matches[0] as $segment) {
-                    $query->whereRaw('jsonb_typeof('.$wrapped.'::jsonb #> ?::text[]) = ?', ['{'.implode(',', $segments).'}', str_starts_with($segment, '.') ? 'object' : 'array']);
-                    $segments[] = trim($segment, '.[]');
-                }
-                $query->whereRaw('('.$wrapped.'::jsonb #> ?::text[]) = ?::jsonb', ['{'.implode(',', $segments).'}', json_encode($value['value'], JSON_THROW_ON_ERROR)]);
+                QueryExpressions::jsonPath($query, $field, $matches[0], $value['value']);
                 break;
             case 'isNull': $query->whereNull($field);
                 break;
@@ -335,7 +336,7 @@ final class QueryCompiler
                     $this->comparisonValue($entry, $fieldDefinition);
                 }
                 if ($fieldType === 'integer' && $value !== []) {
-                    $query->whereRaw($query->getQuery()->getGrammar()->wrap($field).($operator === 'in' ? ' IN (' : ' NOT IN (').implode(', ', array_fill(0, count($value), '?::bigint')).')', $value);
+                    $query->whereRaw($query->getQuery()->getGrammar()->wrap($field).($operator === 'in' ? ' IN (' : ' NOT IN (').implode(', ', array_fill(0, count($value), QueryExpressions::integer($query->getQuery()->getGrammar()))).')', $value);
                     break;
                 }
                 $operator === 'in' ? $query->whereIn($field, $value) : $query->whereNotIn($field, $value);
@@ -348,7 +349,7 @@ final class QueryCompiler
                     $this->comparisonValue($entry, $fieldDefinition);
                 }
                 if ($fieldType === 'integer') {
-                    $query->whereRaw($query->getQuery()->getGrammar()->wrap($field).($operator === 'between' ? ' BETWEEN ' : ' NOT BETWEEN ').'?::bigint AND ?::bigint', $value);
+                    $query->whereRaw($query->getQuery()->getGrammar()->wrap($field).($operator === 'between' ? ' BETWEEN ' : ' NOT BETWEEN ').QueryExpressions::integer($query->getQuery()->getGrammar()).' AND '.QueryExpressions::integer($query->getQuery()->getGrammar()), $value);
                     break;
                 }
                 $operator === 'between' ? $query->whereBetween($field, $value) : $query->whereNotBetween($field, $value);
@@ -362,7 +363,7 @@ final class QueryCompiler
                     throw new ProtocolException('unsupported_query', 'Null comparison requires equality or null predicate.');
                 }
                 if ($fieldType === 'integer' && $value !== null) {
-                    $query->whereRaw($query->getQuery()->getGrammar()->wrap($field).' '.$operator.' ?::bigint', [$value]);
+                    $query->whereRaw($query->getQuery()->getGrammar()->wrap($field).' '.$operator.' '.QueryExpressions::integer($query->getQuery()->getGrammar()), [$value]);
                 } else {
                     $query->where($field, $operator, $value);
                 }
@@ -398,9 +399,9 @@ final class QueryCompiler
                 $this->field($related, $condition['otherField'] ?? '');
             }
             $method = $join['type'] === 'left' ? 'leftJoinSub' : 'joinSub';
-            $query->{$method}($joined, $alias, function ($clause) use ($on, $query, $alias): void {
+            $query->{$method}($joined, $alias, function ($clause) use ($on, $query, $alias, $related, $resource): void {
                 foreach ($on as $condition) {
-                    $clause->on($query->getModel()->qualifyColumn($condition['field']), '=', $alias.'.'.$condition['otherField']);
+                    $clause->on($query->getQuery()->raw($this->comparisonColumn($query, $resource, $condition['field'])), '=', $query->getQuery()->raw($this->comparisonColumn($query, $related, $condition['otherField'], $alias)));
                 }
             });
             $aliases[$alias] = $related;
@@ -437,6 +438,14 @@ final class QueryCompiler
             } elseif ($function === 'exists') {
                 $query->withExists($relations);
             } else {
+                if (($this->manifest->build()['models'][$related->name()]['fields'][$field]['type'] ?? null) === 'string') {
+                    $relations = [$name.' as '.$alias => function (Builder $builder) use ($related, $actor, $function, $field): void {
+                        $related->scope($builder, $actor);
+                        $grammar = $builder->getQuery()->getGrammar();
+                        $column = QueryExpressions::text($grammar->wrap($builder->getModel()->qualifyColumn($field)), $grammar);
+                        $builder->select([])->selectRaw($function.'('.$column.')');
+                    }];
+                }
                 $query->withAggregate($relations, $field, $function);
                 if ($function === 'avg' && ($this->manifest->build()['models'][$related->name()]['fields'][$field]['type'] ?? null) === 'integer') {
                     $query->withSum([$name.' as __synloquent_sum_guard_'.$aggregateIndex => fn (Builder $builder) => $related->scope($builder, $actor)], $field);
@@ -451,11 +460,22 @@ final class QueryCompiler
                 throw new ProtocolException('unsupported_query', 'Scalar aggregate subqueries cannot return grouped rows.');
             }
             $inner = $this->compileTree($innerBase, $actor, $depth + 1, '__synloquent_subquery_'.$this->nodes);
+            $innerQualifier = ($innerDefinition['unions'] ?? []) !== [] ? '__synloquent_union' : $inner->getModel()->getTable();
             $innerResource = $this->registry->get($innerDefinition['model']);
             foreach ($subquery['correlate'] ?? [] as $keys) {
                 $this->field($innerResource, $keys['innerField'] ?? '');
                 $this->field($resource, $keys['outerField'] ?? '');
-                $inner->whereColumn($inner->getModel()->qualifyColumn($keys['innerField']), $query->getModel()->qualifyColumn($keys['outerField']));
+            }
+            $outerQualifier = null;
+            if ($query->getModel()->getConnection()->getDriverName() !== 'pgsql' && array_filter($subquery['correlate'] ?? [], fn (array $keys): bool => $this->manifest->build()['models'][$resource->name()]['fields'][$keys['outerField']]['type'] === 'string') !== []) {
+                // MariaDB caches correlated results using the host collation of outer columns.
+                // Correlate the local source by identity so case variants cannot share a cache entry.
+                $outerModel = new ($resource->modelClass());
+                $outerQualifier = '__synloquent_correlation_'.$this->nodes;
+                $inner->join($outerModel->getTable().' as '.$outerQualifier, $outerQualifier.'.'.$outerModel->getKeyName(), '=', $query->getModel()->getQualifiedKeyName());
+            }
+            foreach ($subquery['correlate'] ?? [] as $keys) {
+                $inner->whereColumn([[$inner->getQuery()->raw($this->comparisonColumn($inner, $innerResource, $keys['innerField'], $innerQualifier)), '=', $query->getQuery()->raw($this->comparisonColumn($query, $resource, $keys['outerField'], $outerQualifier))]]);
             }
             $kind = $subquery['kind'] ?? '';
             if (in_array($kind, ['exists', 'notExists'], true)) {
@@ -478,10 +498,13 @@ final class QueryCompiler
                 if ($field !== '*') {
                     $this->field($innerResource, $field);
                 }
-                $column = $field === '*' ? '*' : $inner->getQuery()->getGrammar()->wrap($inner->getModel()->qualifyColumn($field));
+                $column = $field === '*' ? '*' : $inner->getQuery()->getGrammar()->wrap($innerQualifier.'.'.$field);
+                if (($this->manifest->build()['models'][$innerResource->name()]['fields'][$field]['type'] ?? null) === 'string') {
+                    $column = QueryExpressions::text($column, $inner->getQuery()->getGrammar());
+                }
                 $inner->select([])->selectRaw($function.'('.$column.')')->reorder();
             } else {
-                $inner->select($inner->getModel()->qualifyColumn($selected[0]));
+                $inner->select($innerQualifier.'.'.$selected[0]);
             }
             if ($kind === 'select') {
                 $alias = $subquery['alias'] ?? '';
@@ -491,7 +514,7 @@ final class QueryCompiler
                 } $query->selectSub($inner, $alias);
                 if (isset($innerDefinition['aggregate']) && $innerDefinition['aggregate']['function'] === 'avg' && ($this->manifest->build()['models'][$innerResource->name()]['fields'][$innerDefinition['aggregate']['field']]['type'] ?? null) === 'integer') {
                     $sumQuery = clone $inner;
-                    $sumColumn = $inner->getQuery()->getGrammar()->wrap($inner->getModel()->qualifyColumn($innerDefinition['aggregate']['field']));
+                    $sumColumn = $inner->getQuery()->getGrammar()->wrap($innerQualifier.'.'.$innerDefinition['aggregate']['field']);
                     $query->selectSub($sumQuery->select([])->selectRaw('sum('.$sumColumn.')'), '__synloquent_projection_sum_'.$subqueryIndex);
                 }
             } elseif ($kind === 'where') {
@@ -500,7 +523,7 @@ final class QueryCompiler
                 if (! in_array($operator, ['=', '!=', '<', '<=', '>', '>='], true)) {
                     throw new ProtocolException('unsupported_query', 'Invalid scalar subquery comparison.');
                 }
-                $query->where($query->getModel()->qualifyColumn($subquery['field']), $operator, $inner);
+                $query->where($query->getQuery()->raw($this->comparisonColumn($query, $resource, $subquery['field'])), $operator, $inner);
             } else {
                 throw new ProtocolException('unsupported_query', 'Unknown subquery kind.');
             }
@@ -512,6 +535,15 @@ final class QueryCompiler
             }
             $query->union($this->compileTree($branch, $actor, $depth + 1), (bool) ($union['all'] ?? false));
         }
+    }
+
+    /** @param Builder<Model> $query */
+    private function comparisonColumn(Builder $query, ResourceExport $resource, string $field, ?string $qualifier = null): string
+    {
+        $grammar = $query->getQuery()->getGrammar();
+        $column = $grammar->wrap($qualifier === null ? $query->getModel()->qualifyColumn($field) : ($qualifier === '' ? $field : $qualifier.'.'.$field));
+
+        return $this->manifest->build()['models'][$resource->name()]['fields'][$field]['type'] === 'string' ? QueryExpressions::text($column, $grammar) : $column;
     }
 
     /** @param array<array-key, mixed> $definition */
@@ -528,7 +560,7 @@ final class QueryCompiler
             $absolute = ltrim(ltrim($text, '-'), '0');
             $maximum = str_starts_with($text, '-') ? '9223372036854775808' : '9223372036854775807';
             if (strlen($absolute) > 19 || (strlen($absolute) === 19 && strcmp($absolute, $maximum) > 0)) {
-                throw new ProtocolException('validation_failed', 'Integer query value exceeds PostgreSQL bigint range.');
+                throw new ProtocolException('validation_failed', 'Integer query value exceeds the signed 64-bit range.');
             }
 
             return;

@@ -34,6 +34,7 @@ function fixture(
     malformed?: boolean
     descriptorPatch?: Readonly<Record<string, unknown>>
     escapedRowsKey?: boolean
+    firstRowsValue?: string
   } = {},
 ) {
   const calls: {
@@ -59,9 +60,16 @@ function fixture(
     rowCount: 1,
     rows,
   })
-  const document = options.escapedRowsKey
+  const escapedDocument = options.escapedRowsKey
     ? canonicalDocument.replace('"rows":', '"\\u0072ows":')
     : canonicalDocument
+  const document =
+    options.firstRowsValue === undefined
+      ? escapedDocument
+      : escapedDocument.replace(
+          '"rows":',
+          '"rows":' + options.firstRowsValue + ',"rows":',
+        )
   const firstPart: SnapshotPartIdentity = {
     ordinal: 0,
     downloadUrl:
@@ -254,9 +262,9 @@ test('bounded HTTP preserves exact Unicode wire and raw rows, uses one authentic
     assert.equal(parts[0]!.hash, control.firstPart.hash)
     assert.deepEqual(
       control.stages
-        .filter((stage) => stage.boundary === 'immutable part 0')
+        .filter((stage) => stage.boundary?.startsWith('immutable part 0'))
         .map((stage) => stage.phase),
-      ['jsonDecode', 'shapeValidation'],
+      ['jsonDecode', 'shapeValidation', 'shapeValidation'],
     )
     assert.equal(batch.confirmationToken, 'confirm-token')
     const confirmation = await control.owner.transport.confirmSnapshotParts!(
@@ -554,3 +562,26 @@ test('bounded HTTP preserves the original wire and exact array span with an esca
     assert.equal(control.timers.size, 0)
   }
 })
+
+for (const firstRowsValue of ['null', 'false', '1', '"rows"', '{"rows":[]}'])
+  test(
+    'bounded HTTP rejects a non-array first rows occurrence before yielding: ' +
+      firstRowsValue,
+    async () => {
+      const control = fixture({ firstRowsValue })
+      try {
+        const batch = await control.owner.transport.snapshotPartBatch!(
+          control.request({
+            descriptor: control.descriptor,
+            part: control.firstPart,
+          }),
+        )
+        await assert.rejects(batch.parts[Symbol.asyncIterator]().next(), {
+          code: 'snapshot_invalid',
+        })
+      } finally {
+        await control.owner.close()
+        assert.equal(control.timers.size, 0)
+      }
+    },
+  )

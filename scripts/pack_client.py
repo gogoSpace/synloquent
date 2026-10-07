@@ -21,7 +21,7 @@ distribution = artifacts / 'distribution.json'
 entries = json.loads(distribution.read_text()) if distribution.exists() else {}
 entries['client'] = {'archive':immutable.name, 'sha256':digest}
 distribution.write_text(json.dumps(entries, indent=2)+'\n')
-evidence = repository / '.local/test-results/packages'
+evidence = repository / '.agentic/artifacts/packages'
 evidence.mkdir(parents=True, exist_ok=True)
 (evidence / 'native-package.json').write_text(json.dumps({'archive':str(immutable), 'sha256':digest}, indent=2)+'\n')
 archive.unlink()

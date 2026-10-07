@@ -61,10 +61,12 @@ final class SynloquentServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $migrations = glob(__DIR__.'/../database/migrations/*.php');
+        $migrations = array_map(static fn (string $path): string => basename($path) === '2026_10_02_114329_create_synloquent_active_projection_index.php' ? __DIR__.'/../database/compatibility/'.basename($path) : $path, $migrations);
+        $this->loadMigrationsFrom($migrations);
         $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
         $this->publishes([__DIR__.'/../config/synloquent.php' => config_path('synloquent.php')], 'synloquent-config');
-        $this->publishesMigrations([__DIR__.'/../database/migrations' => database_path('migrations')], 'synloquent-migrations');
+        $this->publishes(array_combine($migrations, array_map(static fn (string $path): string => database_path('migrations/'.basename($path)), $migrations)), 'synloquent-migrations');
         if ($this->app->runningInConsole()) {
             $this->commands([Commands\GenerateCommand::class, Commands\ManifestCommand::class, Commands\DoctorCommand::class, Commands\SnapshotCommand::class, Commands\DeliverEffectsCommand::class]);
         }

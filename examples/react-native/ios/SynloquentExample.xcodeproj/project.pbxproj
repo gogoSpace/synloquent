@@ -37,7 +37,6 @@
 		5DCACB8F33CDC322A6C60F78 /* libPods-SynloquentExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SynloquentExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = SynloquentExample/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = SynloquentExample/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		B45DB24CE946D4A84AA65373 /* SynloquentPerformanceUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SynloquentPerformanceUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F74F37B6FB72054468D246DF /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
@@ -51,26 +50,9 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		CF0E26BBAAE061EC800104FD /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				3FB9E0FDD8DDB6778774B0F0 /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		12F1C4B06B7F7F3B310C7B7A /* SynloquentPerformanceUITests */ = {
-			isa = PBXGroup;
-			children = (
-				2A31D628C2A9BBA1F2A856E5 /* NativeInteractionTests.swift */,
-			);
-			name = SynloquentPerformanceUITests;
-			path = SynloquentPerformanceUITests;
-			sourceTree = "<group>";
-		};
 		13B07FAE1A68108700A75B9A /* SynloquentExample */ = {
 			isa = PBXGroup;
 			children = (
@@ -108,7 +90,6 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
-				12F1C4B06B7F7F3B310C7B7A /* SynloquentPerformanceUITests */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -119,7 +100,6 @@
 			isa = PBXGroup;
 			children = (
 				13B07F961A680F5B00A75B9A /* SynloquentExample.app */,
-				B45DB24CE946D4A84AA65373 /* SynloquentPerformanceUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -144,24 +124,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		120988E813086D72993A2FB1 /* SynloquentPerformanceUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 3E5E2CEEF33713A77B18ABE7 /* Build configuration list for PBXNativeTarget "SynloquentPerformanceUITests" */;
-			buildPhases = (
-				B20600CB655DC567B4E2AB42 /* Sources */,
-				CF0E26BBAAE061EC800104FD /* Frameworks */,
-				E06EEBF147E7C44E157BC9F3 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				4B91C843E1CD867AD55A0681 /* PBXTargetDependency */,
-			);
-			name = SynloquentPerformanceUITests;
-			productName = SynloquentPerformanceUITests;
-			productReference = B45DB24CE946D4A84AA65373 /* SynloquentPerformanceUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 		13B07F861A680F5B00A75B9A /* SynloquentExample */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "SynloquentExample" */;
@@ -210,7 +172,6 @@
 			projectRoot = "";
 			targets = (
 				13B07F861A680F5B00A75B9A /* SynloquentExample */,
-				120988E813086D72993A2FB1 /* SynloquentPerformanceUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -223,13 +184,6 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				B02323C91F664C2194BB7B3C /* PrivacyInfo.xcprivacy in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E06EEBF147E7C44E157BC9F3 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -319,24 +273,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B20600CB655DC567B4E2AB42 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				EC5A4BF5E3CF4315BADD5507 /* NativeInteractionTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		4B91C843E1CD867AD55A0681 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = SynloquentExample;
-			target = 13B07F861A680F5B00A75B9A /* SynloquentExample */;
-			targetProxy = CCD28BFC28D8AD7528631A23 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
@@ -596,15 +533,6 @@
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
 				13B07F951A680F5B00A75B9A /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		3E5E2CEEF33713A77B18ABE7 /* Build configuration list for PBXNativeTarget "SynloquentPerformanceUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				89159A15275F1C334461C325 /* Release */,
-				C912DE6E30F83B5BC3DE1592 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

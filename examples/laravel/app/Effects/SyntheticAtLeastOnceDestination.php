@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Effects;
 
-use PDO;
+use Illuminate\Support\Facades\DB;
 
 final class SyntheticAtLeastOnceDestination extends SyntheticIdempotentDestination
 {
@@ -20,11 +20,15 @@ final class SyntheticAtLeastOnceDestination extends SyntheticIdempotentDestinati
 
     public function deliver(string $idempotencyKey, array $payload): void
     {
-        $configuration = config('database.connections.pgsql');
-        $connection = new PDO('pgsql:host='.$configuration['host'].';port='.$configuration['port'].';dbname='.$configuration['database'], $configuration['username'], $configuration['password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
-        $attempt = $connection->prepare('INSERT INTO synthetic_effect_attempts (destination, idempotency_key) VALUES (?, ?)');
-        $attempt->execute([$this->name(), $idempotencyKey]);
-        $delivery = $connection->prepare('INSERT INTO synthetic_effect_non_idempotent_deliveries (destination, payload) VALUES (?, ?)');
-        $delivery->execute([$this->name(), json_encode($payload, JSON_THROW_ON_ERROR)]);
+        $connectionName = 'synthetic_effect_'.bin2hex(random_bytes(8));
+        $connection = DB::connectUsing($connectionName, DB::connection(config('synloquent.connection'))->getConfig());
+        try {
+            $connection->transaction(function () use ($connection, $idempotencyKey, $payload): void {
+                $connection->table('synthetic_effect_attempts')->insert(['destination' => $this->name(), 'idempotency_key' => $idempotencyKey]);
+                $connection->table('synthetic_effect_non_idempotent_deliveries')->insert(['destination' => $this->name(), 'payload' => json_encode($payload, JSON_THROW_ON_ERROR)]);
+            });
+        } finally {
+            DB::purge($connectionName);
+        }
     }
 }

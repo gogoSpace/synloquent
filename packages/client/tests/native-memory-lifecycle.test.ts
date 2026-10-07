@@ -21,6 +21,7 @@ async function harness(
   options: { missingPressure?: boolean; failedRemoval?: boolean } = {},
 ) {
   let nowMilliseconds = 0
+  let clockFailure = false
   let calls = 0
   let removals = 0
   const listeners = new Map<string, Listener>()
@@ -46,6 +47,11 @@ async function harness(
     },
   }).outputText
   const exported: {
+    readNativeMemoryEvidence?: (owner: MemoryBoundary) => {
+      eventSequence: number
+      events: Array<Record<string, unknown>>
+      lastPressure: Record<string, unknown> | null
+    }
     createNativeMemoryBudget?: (
       configuration: MemoryBudgetConfiguration,
     ) => MemoryBoundary
@@ -70,16 +76,23 @@ async function harness(
   }, exported)
   assert.ok(exported.createNativeMemoryBudget)
   const boundary = exported.createNativeMemoryBudget({
-    nowMilliseconds: () => nowMilliseconds,
+    nowMilliseconds: () => {
+      if (clockFailure) throw new Error('unavailable clock')
+      return nowMilliseconds
+    },
   })
   return {
     boundary,
+    evidence: () => exported.readNativeMemoryEvidence!(boundary),
     listeners,
     get calls() {
       return calls
     },
     get removals() {
       return removals
+    },
+    failClock() {
+      clockFailure = true
     },
     setTime(value: number) {
       nowMilliseconds = value
@@ -811,3 +824,113 @@ for (let depth = 0; depth <= 6; depth += 1) {
     }
   })
 }
+
+test('bounded memory evidence separates pressure, samples, lifecycle and recovery without losing the cause', async () => {
+  const fixture = await harness()
+  try {
+    await fixture.boundary.refresh()
+    fixture.setTime(1)
+    fixture.emit('pressure', {
+      kind: 'critical',
+      source: 'onTrimMemory',
+      trimMemoryLevel: 15,
+      observedAtMonotonicMilliseconds: 900001,
+    })
+    const pressure = fixture.evidence().lastPressure!
+    assert.deepEqual(pressure.payload, {
+      kind: 'critical',
+      source: 'onTrimMemory',
+      trimMemoryLevel: 15,
+      observedAtMonotonicMilliseconds: 900001,
+    })
+    assert.equal(pressure.receivedAtMilliseconds, 1)
+    assert.equal(
+      (pressure.decision as memoryPolicy.MemoryWorkBudget)
+        .maximumSnapshotConcurrency,
+      0,
+    )
+    const sequence = fixture.evidence().eventSequence
+    for (let index = 0; index < 100000; index++)
+      fixture.boundary.policy.current()
+    assert.equal(fixture.evidence().eventSequence, sequence)
+    fixture.setTime(2001)
+    await fixture.boundary.refresh()
+    assert.equal(fixture.boundary.policy.current().reason, 'pressure')
+    for (let index = 2; index < 40; index++) {
+      fixture.setTime(index * 2000 + 1)
+      await fixture.boundary.refresh()
+    }
+    assert.equal(fixture.evidence().events.length, 32)
+    assert.deepEqual(fixture.evidence().lastPressure, pressure)
+    fixture.emit('change', 'background')
+    assert.equal(fixture.evidence().events.at(-1)!.source, 'lifecycle')
+    fixture.emit('memoryWarning', undefined)
+    assert.equal(
+      fixture.evidence().lastPressure!.source,
+      'app-state-memory-warning',
+    )
+    assert.equal(
+      fixture.boundary.policy.current().maximumSnapshotConcurrency,
+      0,
+    )
+  } finally {
+    fixture.boundary.close()
+  }
+})
+
+test('discarded native sample retains original values without replacing a pressure decision', async () => {
+  const fixture = await harness()
+  try {
+    const waiting = deferred<unknown>()
+    fixture.setSample(() => waiting.promise)
+    const pending = fixture.boundary.refresh()
+    await settle()
+    fixture.setTime(5)
+    fixture.emit('memoryWarning', undefined)
+    waiting.resolve(nativeSample())
+    await pending
+    const event = fixture.evidence().events.at(-1)!
+    assert.equal(event.source, 'discarded-sample')
+    assert.equal(event.requestedAtMilliseconds, 0)
+    assert.equal(event.receivedAtMilliseconds, 5)
+    assert.equal(
+      (event.decision as memoryPolicy.MemoryWorkBudget).reason,
+      'pressure',
+    )
+    assert.equal(fixture.boundary.sampleCount, 0)
+  } finally {
+    fixture.boundary.close()
+  }
+})
+
+test('diagnostic clock failure cannot break close or retain subscriptions', async () => {
+  const fixture = await harness()
+  await fixture.boundary.refresh()
+  fixture.failClock()
+  assert.doesNotThrow(() => fixture.boundary.close())
+  assert.equal(fixture.listeners.size, 0)
+  assert.equal(fixture.evidence().events.at(-1)!.source, 'close')
+  assert.equal(fixture.evidence().events.at(-1)!.receivedAtMilliseconds, null)
+})
+
+test('logging a discarded sample does not advance the policy clock or recovery', async () => {
+  const fixture = await harness()
+  try {
+    await fixture.boundary.refresh()
+    fixture.setTime(2000)
+    const waiting = deferred<unknown>()
+    fixture.setSample(() => waiting.promise)
+    const pending = fixture.boundary.refresh()
+    await settle()
+    fixture.boundary.reset()
+    fixture.setTime(10000)
+    waiting.resolve(nativeSample())
+    await pending
+    fixture.setTime(4000)
+    fixture.setSample(async () => nativeSample())
+    await fixture.boundary.refresh()
+    assert.notEqual(fixture.boundary.policy.current().reason, 'invalid_clock')
+  } finally {
+    fixture.boundary.close()
+  }
+})

@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Synloquent\Tests;
 
 use App\Models\Item;
+use App\Models\Note;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Synloquent\Laravel\Protocol\CanonicalJson;
 use Synloquent\Laravel\Protocol\ProtocolException;
 use Synloquent\Laravel\Query\QueryAction;
 use Synloquent\Laravel\Sync\CommandAction;
@@ -41,7 +45,7 @@ final class RecoveryTest extends TestCase
         try {
             $this->assertSame('ready', json_decode(fgets($writer['pipes'][1]), true, flags: JSON_THROW_ON_ERROR)['stage']);
             DB::listen(function (QueryExecuted $event) use ($writer, &$released): void {
-                if (! $released && str_contains($event->sql, 'from "items"')) {
+                if (! $released && str_contains($event->sql, 'from '.DB::connection()->getQueryGrammar()->wrapTable('items'))) {
                     $released = true;
                     fwrite($writer['pipes'][0], "release\n");
                     fflush($writer['pipes'][0]);
@@ -92,6 +96,123 @@ final class RecoveryTest extends TestCase
         Item::flushEventListeners();
     }
 
+    public static function observerVetoCases(): array
+    {
+        return [
+            'create saving' => ['create', 'saving', false],
+            'create creating' => ['create', 'creating', false],
+            'update saving' => ['update', 'saving', false],
+            'update updating' => ['update', 'updating', false],
+            'touch saving' => ['touch', 'saving', false],
+            'touch updating' => ['touch', 'updating', false],
+            'increment updating' => ['increment', 'updating', false],
+            'physical delete' => ['delete', 'deleting', false],
+            'soft delete' => ['delete', 'deleting', true],
+            'restore restoring' => ['restore', 'restoring', true],
+            'restore saving' => ['restore', 'saving', true],
+            'restore updating' => ['restore', 'updating', true],
+            'force delete forceDeleting' => ['forceDelete', 'forceDeleting', true],
+            'force delete deleting' => ['forceDelete', 'deleting', true],
+        ];
+    }
+
+    #[DataProvider('observerVetoCases')]
+    public function test_observer_veto_rolls_back_the_atomic_group_and_replays_rejection(string $method, string $event, bool $softDeletes): void
+    {
+        $this->travelTo(now()->startOfSecond());
+        $action = $this->app->make(MutationAction::class);
+        $owner = $action->execute([$this->operation('veto-owner', 'create', ['title' => 'Original owner'])], $this->actor())['receipts'][0]['canonical'];
+        $action->execute([$this->operation('veto-image', 'create', ['item_id' => (int) $owner['id'], 'url' => 'https://example.invalid/original'], ['model' => 'Image'])], $this->actor());
+        $tag = $action->execute([$this->operation('veto-tag', 'create', ['title' => 'Original tag'], ['model' => 'Tag'])], $this->actor())['receipts'][0]['canonical'];
+        $owner = $action->execute([$this->operation('veto-pivot', 'pivot', ['relation' => 'tags', 'action' => 'attach', 'targets' => [(int) $tag['id']]], ['id' => $owner['id']])], $this->actor())['receipts'][0]['canonical'];
+        $record = $owner;
+        if ($softDeletes) {
+            $record = $action->execute([$this->operation('veto-note', 'create', ['notable_type' => 'item', 'notable_id' => (int) $owner['id'], 'body' => 'Original note'], ['model' => 'Note'])], $this->actor())['receipts'][0]['canonical'];
+            if (in_array($method, ['restore', 'forceDelete'], true)) {
+                $record = $action->execute([$this->operation('veto-note-delete', 'delete', [], ['model' => 'Note', 'id' => $record['id'], 'expectedRevision' => $record['revision']])], $this->actor())['receipts'][0]['canonical'];
+            }
+        }
+        $this->travel(1)->seconds();
+        $tables = ['items', 'images', 'tags', 'item_tag', 'notes', 'synloquent_streams', 'synloquent_revisions', 'synloquent_relation_revisions', 'synloquent_publications', 'synloquent_aliases', 'synloquent_effects'];
+        $state = static function () use ($tables): array {
+            $result = [];
+            foreach ($tables as $table) {
+                $rows = DB::table($table)->get()->map(static fn (object $row): string => json_encode($row, JSON_THROW_ON_ERROR))->all();
+                sort($rows);
+                $result[$table] = $rows;
+            }
+
+            return $result;
+        };
+        $before = $state();
+        $receiptCount = DB::table('synloquent_receipts')->count();
+        $observed = 0;
+        $class = $softDeletes ? Note::class : Item::class;
+        $this->app['events']->listen('eloquent.'.$event.': '.$class, static function (Model $model) use ($method, $record, &$observed): ?bool {
+            if ($method === 'create' ? $model->getAttribute('title') !== 'Blocked create' : (string) $model->getKey() !== $record['id']) {
+                return null;
+            }
+            $observed++;
+            DB::table('images')->update(['url' => 'https://example.invalid/observer-write']);
+
+            return false;
+        });
+        $values = match ($method) {
+            'create' => ['title' => 'Blocked create'],
+            'update' => ['title' => 'Rejected title'],
+            'increment' => ['field' => 'quantity', 'delta' => 2],
+            default => [],
+        };
+        $operations = [
+            $this->operation('veto-earlier', 'create', ['title' => 'Earlier group work'], ['atomicGroup' => 'observer-veto']),
+            $this->operation('veto-target', $method === 'touch' ? 'update' : $method, $values, ['atomicGroup' => 'observer-veto', 'dependsOn' => ['veto-earlier'], 'model' => $softDeletes ? 'Note' : 'Item', 'id' => $record['id'], 'expectedRevision' => $record['revision']]),
+        ];
+        $receipts = $action->execute($operations, $this->actor())['receipts'];
+        $this->assertSame(1, $observed);
+        $this->assertSame(['rejected', 'rejected'], array_column($receipts, 'status'));
+        $this->assertSame('causal_dependency', $receipts[0]['error']['code']);
+        $this->assertSame('validation_failed', $receipts[1]['error']['code']);
+        $this->assertArrayNotHasKey('canonical', $receipts[1]);
+        $this->assertSame($before, $state());
+        $this->assertSame($receiptCount + 2, DB::table('synloquent_receipts')->count());
+        $this->assertSame(['rejected', 'rejected'], DB::table('synloquent_receipts')->whereIn('operation_id', ['veto-earlier', 'veto-target'])->pluck('status')->all());
+        $this->assertSame(CanonicalJson::encode($receipts), CanonicalJson::encode($action->execute($operations, $this->actor())['receipts']));
+        $this->assertSame(1, $observed);
+        $this->assertSame($before, $state());
+        $this->assertSame($receiptCount + 2, DB::table('synloquent_receipts')->count());
+    }
+
+    public function test_zero_affected_rows_from_increment_is_not_an_observer_veto(): void
+    {
+        if (DB::connection()->getDriverName() !== 'pgsql') {
+            $this->markTestSkipped('PostgreSQL RETURN NULL trigger semantics have no MariaDB equivalent. Observer veto coverage runs on both engines.');
+        }
+        $action = $this->app->make(MutationAction::class);
+        $record = $action->execute([$this->operation('zero-increment-owner', 'create', ['title' => 'Zero affected rows', 'quantity' => 4])], $this->actor())['receipts'][0]['canonical'];
+        DB::unprepared('CREATE FUNCTION pg_temp.skip_increment_update() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RETURN NULL; END $$');
+        DB::unprepared('CREATE TRIGGER skip_increment_update BEFORE UPDATE ON items FOR EACH ROW EXECUTE FUNCTION pg_temp.skip_increment_update()');
+        $events = [];
+        $this->app['events']->listen('eloquent.updating: '.Item::class, static function () use (&$events): void {
+            $events[] = 'updating';
+        });
+        $this->app['events']->listen('eloquent.updated: '.Item::class, static function () use (&$events): void {
+            $events[] = 'updated';
+        });
+        try {
+            $affectedRows = Item::findOrFail($record['id'])->increment('quantity', 2);
+            $this->assertSame(0, $affectedRows);
+            $events = [];
+            $receipt = $action->execute([$this->operation('zero-increment', 'increment', ['field' => 'quantity', 'delta' => 2], ['id' => $record['id'], 'expectedRevision' => $record['revision']])], $this->actor())['receipts'][0];
+            $this->assertSame('accepted', $receipt['status']);
+            $this->assertSame(4, $receipt['canonical']['attributes']['quantity']);
+            $this->assertSame(['updating', 'updated'], $events);
+            $this->assertSame(4, Item::findOrFail($record['id'])->quantity);
+        } finally {
+            DB::unprepared('DROP TRIGGER skip_increment_update ON items');
+            DB::unprepared('DROP FUNCTION pg_temp.skip_increment_update()');
+        }
+    }
+
     public function test_registered_update_and_shared_locks_execute_inside_the_gateway(): void
     {
         $record = $this->app->make(MutationAction::class)->execute([$this->operation('locked-item', 'create', ['title' => 'Locked target', 'quantity' => 9])], $this->actor())['receipts'][0]['canonical'];
@@ -99,10 +220,10 @@ final class RecoveryTest extends TestCase
         DB::listen(function (QueryExecuted $event) use (&$queries): void {
             $queries[] = $event->sql;
         });
-        foreach (['update' => 'for update', 'shared' => 'for share'] as $mode => $fragment) {
+        foreach (['update' => 'for update', 'shared' => DB::connection()->getDriverName() === 'pgsql' ? 'for share' : 'lock in share mode'] as $mode => $fragment) {
             $result = $this->app->make(CommandAction::class)->execute(['name' => 'inspectItemLocked', 'operationId' => 'lock-'.$mode, 'arguments' => ['item_id' => (int) $record['id'], 'mode' => $mode]], $this->actor());
             $this->assertSame(['quantity' => 9, 'lockMode' => $mode], $result['result']);
-            $this->assertNotEmpty(array_filter($queries, static fn (string $query): bool => str_contains($query, '"items"') && str_contains($query, $fragment)));
+            $this->assertNotEmpty(array_filter($queries, static fn (string $query): bool => str_contains($query, DB::connection()->getQueryGrammar()->wrapTable('items')) && str_contains($query, $fragment)));
         }
         $this->assertSame(1, DB::table('synloquent_publications')->count());
         $this->assertSame(3, DB::table('synloquent_receipts')->count());
@@ -115,7 +236,7 @@ final class RecoveryTest extends TestCase
         $second = $this->operation('second', 'create', ['title' => 'Atomic'], ['atomicGroup' => 'group']);
         $receipts = $action->execute([$first, $second], $this->actor())['receipts'];
         $this->assertSame(['rejected', 'rejected'], array_column($receipts, 'status'));
-        $this->assertSame('23505', $receipts[1]['error']['details']['sqlState']);
+        $this->assertSame(DB::connection()->getDriverName() === 'pgsql' ? '23505' : '23000', $receipts[1]['error']['details']['sqlState']);
         $this->assertSame(0, Item::count());
         $this->assertSame(0, DB::table('synloquent_revisions')->count());
         $this->assertSame(0, DB::table('synloquent_publications')->count());
@@ -165,12 +286,15 @@ final class RecoveryTest extends TestCase
         try {
             $locked = json_decode(fgets($first['pipes'][1]), true, flags: JSON_THROW_ON_ERROR);
             $this->assertSame('locked', $locked['stage']);
+            $this->assertWorkerIdentity($locked);
             $second = $this->worker('second');
             $attempting = json_decode(fgets($second['pipes'][1]), true, flags: JSON_THROW_ON_ERROR);
             $this->assertSame('attempting', $attempting['stage']);
+            $this->assertWorkerIdentity($attempting);
+            $this->assertNotSame($locked['backend'], $attempting['backend']);
             $deadline = microtime(true) + 5;
             do {
-                $activity = DB::selectOne('select wait_event_type from pg_stat_activity where pid = ?', [$attempting['backend']]);
+                $activity = $this->lockActivity($attempting['backend']);
                 if ($activity?->wait_event_type === 'Lock') {
                     break;
                 }

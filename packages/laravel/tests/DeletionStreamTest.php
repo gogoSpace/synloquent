@@ -189,7 +189,7 @@ final class DeletionStreamTest extends TestCase
         DB::listen(static function (QueryExecuted $event) use (&$active, &$queries, &$lockAcquired): void {
             if ($active) {
                 $queries[$event->sql] = ($queries[$event->sql] ?? 0) + 1;
-                if (str_contains($event->sql, '"synloquent_streams"') && str_contains($event->sql, 'for update')) {
+                if (str_contains($event->sql, 'synloquent_streams') && str_contains($event->sql, 'for update')) {
                     $lockAcquired = hrtime(true);
                 }
             }
@@ -256,7 +256,7 @@ final class DeletionStreamTest extends TestCase
             }
             $sources = ['DeletionCapture' => __DIR__.'/../src/Sync/DeletionCapture.php', 'CaptureStreamGuard' => __DIR__.'/../src/Sync/CaptureStreamGuard.php', 'RevisionStore' => __DIR__.'/../src/Sync/RevisionStore.php', 'WriteContext' => __DIR__.'/../src/Sync/WriteContext.php', 'MutationAction' => __DIR__.'/../src/Sync/MutationAction.php', 'fixture' => __FILE__];
             $profile = ['development' => true, 'action' => $action, 'descendants' => $count, 'ownerPlusDescendants' => $count + 1, 'captureCap' => $captureCap, 'rejectionCap' => $rejectionCap, 'rejectionStatus' => $rejection['status'], 'existingDeletionBound' => 'Counts staged dependents. Root is added to the publication separately.', 'sqlCount' => array_sum($queries), 'elapsedSeconds' => ($ended - $started) / 1e9, 'streamLockHoldSeconds' => ($committed - $lockAcquired) / 1e9, 'phaseSeconds' => ['lockToDeleting' => ($ownerEventTimes['deleting'] - $lockAcquired) / 1e9, 'deletingToDeleted' => ($ownerEventTimes['deleted'] - $ownerEventTimes['deleting']) / 1e9, 'deletedToCommit' => ($committed - $ownerEventTimes['deleted']) / 1e9], 'phaseDefinition' => ['lockToDeleting' => 'Includes scoped root read, revision check, referential staging and dependency stream guards.', 'deletingToDeleted' => 'Includes physical owner SQL deletion, PostgreSQL referential effects and owner event dispatch.', 'deletedToCommit' => 'Includes batched dependent reload and capture, root capture, receipt and durable publication.'], 'sqlProfile' => $queries, 'journalRecords' => count($journal), 'revisionTwoRows' => $count + 1, 'authorizedPullRecords' => $authorizedCounts, 'staleChildStatus' => $staleStatus, 'ownerEvents' => $events, 'databaseVersion' => DB::selectOne('SELECT version() AS version')->version, 'sourceHashes' => array_map(fn (string $path): string => hash_file('sha256', $path), $sources)];
-            file_put_contents(dirname(__DIR__, 3).'/.local/test-results/server-delete-fanout-'.$label.'-'.$action.'-'.$count.'.json', json_encode($profile, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR)."\n");
+            file_put_contents(dirname(__DIR__, 3).'/.agentic/artifacts/server-delete-fanout-'.$label.'-'.$action.'-'.$count.'.json', json_encode($profile, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR)."\n");
         }
     }
 
@@ -426,7 +426,7 @@ final class DeletionStreamTest extends TestCase
             $table->id();
             $table->bigInteger('tenant_id');
             $table->bigInteger('actor_id');
-            $table->bigInteger('child_id')->nullable();
+            $table->foreignId('child_id')->nullable();
             $table->string('title');
             $table->foreign(['child_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('fixture_deletion_cascade_children')->cascadeOnDelete();
         });

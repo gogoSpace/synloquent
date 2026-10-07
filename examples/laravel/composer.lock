@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ba7fa82d8fb30807137fe468d3df5505",
+    "content-hash": "14e7f7a08f0e9a69c853d1f41abd6278",
     "packages": [
         {
             "name": "brick/math",
@@ -5818,31 +5818,23 @@
             "name": "synloquent/laravel",
             "version": "0.1.0",
             "dist": {
-                "type": "path",
-                "url": "../../packages/laravel",
-                "reference": "084d9744bebc818b04ee7fc9550ca81381453291"
+                "type": "zip",
+                "url": "../../artifacts/packages/synloquent-laravel-0.1.0-b96bcf4c877892cd.zip",
+                "shasum": "7bca658d38244e816851115823509cf4ab2b4c6a"
             },
             "require": {
                 "ext-json": "*",
                 "ext-pdo": "*",
-                "illuminate/auth": "^13.34",
-                "illuminate/console": "^13.34",
-                "illuminate/contracts": "^13.34",
-                "illuminate/database": "^13.34",
-                "illuminate/http": "^13.34",
-                "illuminate/routing": "^13.34",
-                "illuminate/support": "^13.34",
-                "illuminate/validation": "^13.34",
+                "illuminate/auth": "^12.55 || ^13.34",
+                "illuminate/console": "^12.55 || ^13.34",
+                "illuminate/contracts": "^12.55 || ^13.34",
+                "illuminate/database": "^12.55 || ^13.34",
+                "illuminate/http": "^12.55 || ^13.34",
+                "illuminate/routing": "^12.55 || ^13.34",
+                "illuminate/support": "^12.55 || ^13.34",
+                "illuminate/validation": "^12.55 || ^13.34",
                 "opis/json-schema": "2.6.0",
                 "php": "^8.3"
-            },
-            "require-dev": {
-                "larastan/larastan": "3.12.2",
-                "laravel/framework": "13.34.0",
-                "laravel/pint": "1.32.1",
-                "orchestra/testbench": "11.3.0",
-                "phpstan/phpstan": "2.2.16",
-                "phpunit/phpunit": "^12.5.8"
             },
             "type": "library",
             "extra": {
@@ -5857,42 +5849,9 @@
                     "Synloquent\\Laravel\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Synloquent\\Tests\\": "tests/"
-                }
-            },
-            "archive": {
-                "exclude": [
-                    "vendor",
-                    "tests",
-                    ".phpstan.cache",
-                    ".phpunit.cache",
-                    "composer.lock",
-                    "phpunit.xml",
-                    "phpstan.neon",
-                    "pint.json"
-                ]
-            },
-            "scripts": {
-                "test": [
-                    "phpunit"
-                ],
-                "lint": [
-                    "pint --test"
-                ],
-                "analyse": [
-                    "phpstan analyse --memory-limit=1G"
-                ]
-            },
             "license": [
                 "MIT"
-            ],
-            "description": "Explicit Eloquent exports, deterministic TypeScript generation and transactional offline synchronization",
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
+            ]
         },
         {
             "name": "tijsverkoyen/css-to-inline-styles",

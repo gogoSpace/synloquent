@@ -6,6 +6,7 @@ import {
   type MemoryBudgetConfiguration,
   type MemoryBudgetPolicy,
   type MemoryObservation,
+  type MemoryWorkBudget,
 } from '../core/memory-budget.js'
 
 export interface NativeMemoryBudget {
@@ -19,6 +20,54 @@ export interface NativeMemoryBudget {
   /** Reject observations from the previous account or database lifecycle. */
   reset(): void
   close(): void
+}
+
+// Internal diagnostics, deliberately not re-exported from the public entrypoint.
+interface MemoryEvidenceEvent {
+  readonly sequence: number
+  readonly source: string
+  readonly receivedAtMilliseconds: number | null
+  readonly revision: number
+  readonly requestedAtMilliseconds?: number
+  readonly payload: Readonly<Record<string, unknown>>
+  readonly observation?: MemoryObservation
+  readonly decision?: MemoryWorkBudget
+}
+const evidenceReaders = new WeakMap<NativeMemoryBudget, () => unknown>()
+export function readNativeMemoryEvidence(owner: NativeMemoryBudget): unknown {
+  return evidenceReaders.get(owner)?.()
+}
+function diagnosticPayload(value: unknown): Readonly<Record<string, unknown>> {
+  if (typeof value !== 'object' || value === null)
+    return { value: String(value).slice(0, 128) }
+  const record = value as Record<string, unknown>
+  return Object.fromEntries(
+    [
+      'kind',
+      'source',
+      'trimMemoryLevel',
+      'observedAtMonotonicMilliseconds',
+      'processHeadroomBytes',
+      'systemAvailableBytes',
+      'systemLowMemoryThresholdBytes',
+      'systemLowMemory',
+      'sampledAtMonotonicMilliseconds',
+    ]
+      .filter((field) => field in record)
+      .map((field) => {
+        const value = record[field]
+        return [
+          field,
+          typeof value === 'string'
+            ? value.slice(0, 128)
+            : typeof value === 'number' ||
+                typeof value === 'boolean' ||
+                value === null
+              ? value
+              : typeof value,
+        ]
+      }),
+  )
 }
 
 function bytes(value: unknown): number | undefined {
@@ -89,8 +138,54 @@ export function createNativeMemoryBudget(
   let sampleRequestCount = 0
   let lastObservation: MemoryObservation | undefined
   let nativePressureSubscriptionActive = false
-  const unknown = () => {
-    policy.observe({
+  const events: MemoryEvidenceEvent[] = []
+  let eventSequence = 0
+  let lastPressure: MemoryEvidenceEvent | undefined
+  let lastObservedDecision: MemoryWorkBudget | undefined
+  const record = (
+    source: string,
+    payload: unknown,
+    observation?: MemoryObservation,
+    requestedAtMilliseconds?: number,
+  ) => {
+    // Preserve the original policy operation before best-effort diagnostics.
+    if (observation !== undefined)
+      lastObservedDecision = policy.observe(observation)
+    try {
+      let receivedAtMilliseconds: number | null = null
+      try {
+        receivedAtMilliseconds = configuration.nowMilliseconds()
+      } catch {
+        /* Unavailable diagnostic clock. */
+      }
+      const event: MemoryEvidenceEvent = {
+        sequence: ++eventSequence,
+        source,
+        receivedAtMilliseconds,
+        revision,
+        payload: diagnosticPayload(payload),
+        ...(requestedAtMilliseconds === undefined
+          ? {}
+          : { requestedAtMilliseconds }),
+        ...(observation === undefined ? {} : { observation }),
+        ...(lastObservedDecision === undefined
+          ? {}
+          : { decision: lastObservedDecision }),
+      }
+      if (events.length === 32) events.shift()
+      events.push(event)
+      if (
+        observation?.pressure === 'warning' ||
+        observation?.pressure === 'critical'
+      )
+        lastPressure = event
+    } catch {
+      /* Diagnostics cannot prevent the policy decision or listener cleanup. */
+    }
+  }
+
+  const unknown = (source = 'unavailable', payload: unknown = null) => {
+    record(source, payload, {
       observedAtMilliseconds: configuration.nowMilliseconds(),
       validity: 'unavailable',
       pressure: 'unknown',
@@ -100,7 +195,7 @@ export function createNativeMemoryBudget(
     revision += 1
     foregroundRevision = undefined
     lastRequestMilliseconds = undefined
-    if (!closed) unknown()
+    if (!closed) unknown('reset')
   }
   const sample = (foreground = false): Promise<void> | undefined => {
     const requested = configuration.nowMilliseconds()
@@ -120,22 +215,26 @@ export function createNativeMemoryBudget(
       })
       .then(
         (sample: unknown) => {
-          if (closed || revision !== requestedRevision) return
+          if (closed || revision !== requestedRevision) {
+            if (!closed)
+              record('discarded-sample', sample, undefined, requested)
+            return
+          }
           const completed = configuration.nowMilliseconds()
           if (
             completed < requested ||
             completed - requested >
               memoryBudgetTiming.maximumObservationAgeMilliseconds
           ) {
-            unknown()
+            unknown('expired-sample', sample)
             return
           }
           lastObservation = sampleObservation(sample, requested)
           sampleCount += 1
-          policy.observe(lastObservation)
+          record('sample', sample, lastObservation, requested)
         },
         () => {
-          if (!closed && revision === requestedRevision) unknown()
+          if (!closed && revision === requestedRevision) unknown('sample-error')
         },
       )
   }
@@ -202,7 +301,7 @@ export function createNativeMemoryBudget(
           typeof event.observedAtMonotonicMilliseconds === 'number' &&
           Number.isFinite(event.observedAtMonotonicMilliseconds) &&
           event.observedAtMonotonicMilliseconds >= 0
-        policy.observe({
+        record('native-pressure', event, {
           observedAtMilliseconds: configuration.nowMilliseconds(),
           validity: 'unavailable',
           pressure:
@@ -226,6 +325,7 @@ export function createNativeMemoryBudget(
     subscriptions.push(
       AppState.addEventListener('change', (state) => {
         reset()
+        record('lifecycle', { source: state })
         if (state === 'active') {
           if (pending) foregroundRevision = revision
           void refresh()
@@ -236,7 +336,7 @@ export function createNativeMemoryBudget(
       AppState.addEventListener('memoryWarning', () => {
         revision += 1
         foregroundRevision = undefined
-        policy.observe({
+        record('app-state-memory-warning', null, {
           observedAtMilliseconds: configuration.nowMilliseconds(),
           validity: 'unavailable',
           pressure: 'warning',
@@ -246,7 +346,7 @@ export function createNativeMemoryBudget(
   } catch {
     unknown()
   }
-  return {
+  const owner: NativeMemoryBudget = {
     policy,
     get sampleCount() {
       return sampleCount
@@ -277,6 +377,15 @@ export function createNativeMemoryBudget(
       }
       subscriptions.length = 0
       policy.close()
+      lastObservedDecision = policy.current()
+      record('close', null)
     },
   }
+  evidenceReaders.set(owner, () => ({
+    eventSequence,
+    events: events.slice(),
+    lastPressure: lastPressure ?? null,
+    revision,
+  }))
+  return owner
 }

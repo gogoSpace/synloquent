@@ -54,6 +54,31 @@ react {
     autolinkLibrariesWithApp()
 }
 
+// RN excludes node_modules from its default bundle inputs. Track the local package.
+tasks.withType(com.facebook.react.tasks.BundleHermesCTask).configureEach {
+    inputs.files(fileTree("../../node_modules/@synloquent/client") {
+        include "package.json", "dist/**", "src/native-crypto/specs/**"
+    }).withPropertyName("synloquentClient").withPathSensitivity(PathSensitivity.RELATIVE)
+
+    // Keep the output binding outside APK assets, produced only after bundling succeeds.
+    def contentProof = layout.buildDirectory.file("intermediates/synloquent/${name}/bundle-content.json")
+    outputs.file(contentProof).withPropertyName("synloquentBundleContent")
+    doLast {
+        def bundleName = bundleAssetName.get()
+        def hashFile = { File source ->
+            java.security.MessageDigest.getInstance("SHA-256").digest(source.bytes).encodeHex().toString()
+        }
+        def proofFile = contentProof.get().asFile
+        proofFile.parentFile.mkdirs()
+        proofFile.text = groovy.json.JsonOutput.toJson([
+            schemaVersion: 1,
+            bundleSha256: hashFile(new File(jsBundleDir.get().asFile, bundleName)),
+            packagerMapSha256: hashFile(new File(jsIntermediateSourceMapsDir.get().asFile, "${bundleName}.packager.map")),
+            compilerMapSha256: hashFile(new File(jsIntermediateSourceMapsDir.get().asFile, "${bundleName}.compiler.map"))
+        ]) + "\n"
+    }
+}
+
 /**
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
  */

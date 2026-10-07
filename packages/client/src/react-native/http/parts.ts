@@ -316,14 +316,25 @@ export function createSnapshotPartBatch(configuration: {
           configuration.budget,
         )
         if (!valid) invalid()
+        configuration.stage({
+          kind: 'snapshot',
+          phase: 'shapeValidation',
+          boundary: `immutable part ${identity.ordinal} payload`,
+          elapsedMilliseconds: configuration.now() - stageStarted,
+          maximumWorkSliceMilliseconds: configuration.budget.endMeasurement(),
+        })
+        configuration.phase('shapeValidation')
+        stageStarted = configuration.now()
+        configuration.budget.beginMeasurement()
         const rawRows = await rawRowsSpan(document, configuration.budget)
         configuration.assertActive()
         configuration.stage({
           kind: 'snapshot',
           phase: 'shapeValidation',
-          boundary: `immutable part ${identity.ordinal}`,
+          boundary: `immutable part ${identity.ordinal} rawRows`,
           elapsedMilliseconds: configuration.now() - stageStarted,
           maximumWorkSliceMilliseconds: configuration.budget.endMeasurement(),
+          responseCharacters: document.length,
         })
         yield {
           format: 'canonical-parts-v1',

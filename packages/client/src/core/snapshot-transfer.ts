@@ -1,8 +1,11 @@
 import { SynloquentError } from './errors.js'
 import type { BindValue, TransactionExecutor } from './database.js'
 import { snapshotPhase, utf8Length } from './snapshot-content.js'
+import {
+  installSnapshotContents,
+  snapshotAdmissionDetails,
+} from './snapshot-installation.js'
 import type { Storage } from './storage.js'
-import type { MemoryWorkBudget } from './memory-budget.js'
 import type {
   CanonicalRecord,
   DigestLifecycle,
@@ -262,29 +265,6 @@ function assertCurrent(
       'session_changed',
       'Snapshot acquisition was cancelled.',
     )
-}
-function snapshotAdmissionDetails(
-  budget: MemoryWorkBudget,
-): Readonly<Record<string, unknown>> {
-  try {
-    return {
-      reason: 'memory-pressure',
-      memoryBudget: {
-        level: budget.level,
-        reason: budget.reason,
-        maximumBatchRows: budget.maximumBatchRows,
-        maximumBindingBytes: budget.maximumBindingBytes,
-        maximumHashBufferUnits: budget.maximumHashBufferUnits,
-        maximumCacheBytes: budget.maximumCacheBytes,
-        maximumCacheEntries: budget.maximumCacheEntries,
-        maximumPrefetchConcurrency: budget.maximumPrefetchConcurrency,
-        maximumSnapshotConcurrency: budget.maximumSnapshotConcurrency,
-        maximumSnapshotResponseBytes: budget.maximumSnapshotResponseBytes,
-      },
-    }
-  } catch {
-    return { reason: 'memory-pressure', memoryBudgetContextUnavailable: true }
-  }
 }
 async function admit(
   storage: Storage,
@@ -1014,167 +994,54 @@ export async function installSnapshotParts(
         final.relationSetCount !== descriptor.relationSetCount
       )
         invalid('Snapshot acquisition is incomplete.')
-      const executor = storage.snapshotExecutor(original)
-      const pendingEffects = await storage.assertBoundedSnapshotEffects(
+      await installSnapshotContents(
+        storage,
+        descriptor,
+        {
+          kind: 'parts',
+          assertCurrent: () => assertCurrent(lifecycle, assertSession),
+          records: (consume) =>
+            rowPages(
+              storage,
+              original,
+              descriptor,
+              'records',
+              undefined,
+              consume,
+            ) as AsyncIterable<readonly CanonicalRecord[]>,
+          relationSets: () =>
+            rowPages(
+              storage,
+              original,
+              descriptor,
+              'relationSets',
+              undefined,
+              true,
+            ) as AsyncIterable<readonly RelationSet[]>,
+        },
         original,
-        descriptor.dataset,
+        changed,
       )
-      snapshotPhase(storage.configuration, 'staging', 'begin')
-      await storage.beginSnapshotStaging(executor)
-      const comparisons = new Map<string, boolean>()
-      try {
-        for await (const page of rowPages(
-          storage,
-          original,
-          descriptor,
-          'records',
-        )) {
-          assertCurrent(lifecycle, assertSession)
-          await storage.stageSnapshotRecords(
-            page as readonly CanonicalRecord[],
-            executor,
-            true,
-            comparisons,
+      const executor = storage.snapshotExecutor(original)
+      await executor.execute(
+        'DELETE FROM syn_snapshot_acquisitions WHERE partition = ? AND dataset = ?',
+        [storage.partition, descriptor.dataset],
+      )
+      if (
+        !(
+          await executor.execute(
+            'SELECT 1 FROM syn_snapshot_acquisitions LIMIT 1',
           )
-        }
-        comparisons.clear()
-        await storage.endSnapshotStaging(executor)
-        await storage.clearCanonicalRelations(executor, changed)
-        snapshotPhase(storage.configuration, 'records', 'begin')
-        try {
-          for await (const page of rowPages(
-            storage,
-            original,
-            descriptor,
-            'records',
-            undefined,
-            true,
-          )) {
-            assertCurrent(lifecycle, assertSession)
-            await storage.ingestSnapshotRecords(
-              page as readonly CanonicalRecord[],
-              executor,
-              changed,
-              true,
-            )
-          }
-        } finally {
-          snapshotPhase(storage.configuration, 'records', 'end')
-        }
-        snapshotPhase(storage.configuration, 'relationSets', 'begin')
-        try {
-          for await (const page of rowPages(
-            storage,
-            original,
-            descriptor,
-            'relationSets',
-            undefined,
-            true,
-          )) {
-            assertCurrent(lifecycle, assertSession)
-            await storage.ingestSnapshotRelationSets(
-              page as readonly RelationSet[],
-              executor,
-              changed,
-              true,
-            )
-          }
-        } finally {
-          snapshotPhase(storage.configuration, 'relationSets', 'end')
-        }
-        for await (const entry of storage.pendingEntries(original, {}, true)) {
-          if (
-            !['pending', 'sending', 'conflicted', 'rejected'].includes(
-              entry.status,
-            )
-          )
-            continue
-          const record = await storage.findStored(
-            entry.operation.model,
-            entry.operation.localIdentity,
-            executor,
-          )
-          if (record?.serverIdentity === null)
-            await storage.persist(
-              { ...record, visible: true },
-              executor,
-              changed,
-            )
-          else if (
-            record &&
-            !record.visible &&
-            Object.keys(record.proposal).length
-          )
-            await executor.execute(
-              'INSERT OR REPLACE INTO syn_recovery(partition,model,local_identity,proposal,reason) VALUES (?,?,?,?,?)',
-              [
-                storage.partition,
-                record.model,
-                record.localIdentity,
-                canonicalJson(record.proposal),
-                'snapshot_scope_removed',
-              ],
-            )
-        }
-        if (pendingEffects)
-          await storage.applyPendingDeleteEffects(executor, changed)
-        await storage.rebuildRelationOverlays(executor, changed, true)
-        assertCurrent(lifecycle, assertSession)
-        const activationBudget = storage.snapshotWorkBudget()
-        if (!activationBudget.maximumSnapshotConcurrency)
-          throw new SynloquentError(
-            'snapshot_admission_required',
-            'Snapshot activation paused under memory pressure.',
-            snapshotAdmissionDetails(activationBudget),
-          )
-        snapshotPhase(storage.configuration, 'integrity', 'begin')
-        try {
-          const integrity = await executor.execute('PRAGMA integrity_check')
-          if (integrity.rows.some((row) => !Object.values(row).includes('ok')))
-            invalid('SQLite integrity check failed.')
-          if ((await executor.execute('PRAGMA foreign_key_check')).rows.length)
-            invalid('SQLite foreign key validation failed.')
-        } finally {
-          snapshotPhase(storage.configuration, 'integrity', 'end')
-        }
-        await storage.setMetadata(
-          `cursor:${descriptor.dataset}`,
-          descriptor.cursor,
-          executor,
-        )
-        await storage.setMetadata(
-          'scope',
-          canonicalJson(descriptor.scope),
-          executor,
-        )
-        await storage.setMetadata(
-          'snapshotGeneration',
-          descriptor.generation,
-          executor,
-        )
-        await executor.execute(
-          'DELETE FROM syn_snapshot_acquisitions WHERE partition = ? AND dataset = ?',
-          [storage.partition, descriptor.dataset],
-        )
-        if (
-          !(
-            await executor.execute(
-              'SELECT 1 FROM syn_snapshot_acquisitions LIMIT 1',
-            )
-          ).rows.length
-        ) {
-          await executor.execute('DROP TABLE syn_snapshot_rows')
-          await executor.execute('DROP TABLE syn_snapshot_parts')
-          await executor.execute('DROP TABLE syn_snapshot_acquisitions')
-          await executor.execute('DROP INDEX syn_outbox_record_replay')
-        }
-        changed.add('*')
-        snapshotPhase(storage.configuration, 'staging', 'end')
-        committing = true
-        snapshotPhase(storage.configuration, 'commit', 'begin')
-      } finally {
-        await original.execute('DROP TABLE syn_snapshot_membership')
+        ).rows.length
+      ) {
+        await executor.execute('DROP TABLE syn_snapshot_rows')
+        await executor.execute('DROP TABLE syn_snapshot_parts')
+        await executor.execute('DROP TABLE syn_snapshot_acquisitions')
+        await executor.execute('DROP INDEX syn_outbox_record_replay')
       }
+      assertCurrent(lifecycle, assertSession)
+      committing = true
+      snapshotPhase(storage.configuration, 'commit', 'begin')
     }, true)
     storage.memoryCache.clear()
   } finally {

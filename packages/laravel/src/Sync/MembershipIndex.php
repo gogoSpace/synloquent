@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Synloquent\Laravel\Sync;
 
 use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Schema\Blueprint;
 use Pdo\Pgsql;
 use Synloquent\Laravel\Protocol\CanonicalJson;
 use Synloquent\Laravel\Protocol\ProtocolException;
@@ -24,40 +25,52 @@ final class MembershipIndex
         $seenTable = null;
         if ($state !== null) {
             $seenTable = '__synloquent_seen_'.bin2hex(random_bytes(8));
-            $connection->statement('CREATE TEMPORARY TABLE '.$seenTable.' (key varchar(64) PRIMARY KEY) ON COMMIT DROP');
+            if ($connection->getDriverName() === 'pgsql') {
+                $connection->statement('CREATE TEMPORARY TABLE '.$seenTable.' (key varchar(64) PRIMARY KEY) ON COMMIT DROP');
+            } else {
+                $connection->getSchemaBuilder()->create($seenTable, function (Blueprint $table): void {
+                    $table->temporary();
+                    $table->string('key', 64)->primary();
+                });
+            }
         }
-        $chunk = [];
-        foreach ($membership as $member) {
-            $key = $this->key($member);
-            $chunk[$key] = $member;
-            if (count($chunk) === 4000) {
+        try {
+            $chunk = [];
+            foreach ($membership as $member) {
+                $key = $this->key($member);
+                $chunk[$key] = $member;
+                if (count($chunk) === 4000) {
+                    $this->initializeChunk($chunk, $scope, $sequence, $state === null);
+                    if ($seenTable !== null) {
+                        $connection->table($seenTable)->insert(array_map(static fn (string $key): array => ['key' => $key], array_keys($chunk)));
+                    }
+                    $chunk = [];
+                }
+            }
+            if ($chunk !== []) {
                 $this->initializeChunk($chunk, $scope, $sequence, $state === null);
                 if ($seenTable !== null) {
                     $connection->table($seenTable)->insert(array_map(static fn (string $key): array => ['key' => $key], array_keys($chunk)));
                 }
-                $chunk = [];
             }
-        }
-        if ($chunk !== []) {
-            $this->initializeChunk($chunk, $scope, $sequence, $state === null);
-            if ($seenTable !== null) {
-                $connection->table($seenTable)->insert(array_map(static fn (string $key): array => ['key' => $key], array_keys($chunk)));
-            }
-        }
-        if ($state !== null) {
-            $missing = [];
-            foreach ($this->at($scope, (int) $state->current_sequence)->whereNotNull('state')->whereNotExists(fn ($query) => $query->selectRaw('1')->from($seenTable)->whereColumn($seenTable.'.key', 'synloquent_projection_memberships.key'))->select('key')->cursor() as $row) {
-                $missing[$row->key] = null;
-                if (count($missing) === 4000) {
-                    $this->advance($missing, $scope, $sequence);
-                    $missing = [];
+            if ($state !== null) {
+                $missing = [];
+                foreach ($this->at($scope, (int) $state->current_sequence)->whereNotNull('state')->whereNotExists(fn ($query) => $query->selectRaw('1')->from($seenTable)->whereColumn($seenTable.'.key', 'synloquent_projection_memberships.key'))->select('key')->cursor() as $row) {
+                    $missing[$row->key] = null;
+                    if (count($missing) === 4000) {
+                        $this->advance($missing, $scope, $sequence);
+                        $missing = [];
+                    }
                 }
+                if ($missing !== []) {
+                    $this->advance($missing, $scope, $sequence);
+                }
+                $this->advance([], $scope, $sequence);
             }
-            if ($missing !== []) {
-                $this->advance($missing, $scope, $sequence);
+        } finally {
+            if ($seenTable !== null && $connection->getDriverName() !== 'pgsql') {
+                $connection->statement('DROP TEMPORARY TABLE IF EXISTS '.$connection->getQueryGrammar()->wrapTable($seenTable));
             }
-            $this->advance([], $scope, $sequence);
-            $connection->statement('DROP TABLE '.$seenTable);
         }
     }
 
@@ -199,7 +212,7 @@ final class MembershipIndex
         $connection = $this->database->connection();
         $driver = $connection->getPdo();
         if (! $driver instanceof Pgsql) {
-            $connection->table('synloquent_projection_memberships')->insert($rows);
+            $this->profiler->measure('membership.insert', fn () => $connection->table('synloquent_projection_memberships')->insert($rows));
 
             return;
         }
@@ -230,11 +243,11 @@ final class MembershipIndex
      */
     private function versions(array $keys, string $scope, ?int $sequence): array
     {
-        $candidates = implode(', ', array_fill(0, count($keys), '(?::varchar)'));
-        $condition = $sequence === null ? 'valid_until IS NULL' : 'sequence <= ?';
-        $bindings = [...$keys, $scope, ...($sequence === null ? [] : [$sequence])];
+        $query = $sequence === null
+            ? $this->database->connection()->table('synloquent_projection_memberships')->where('scope', $scope)->whereNull('valid_until')
+            : $this->at($scope, $sequence);
 
-        return $this->database->connection()->select('SELECT candidates.key, version.state, version.sequence FROM (VALUES '.$candidates.') AS candidates(key) CROSS JOIN LATERAL (SELECT state, sequence FROM synloquent_projection_memberships WHERE scope = ? AND key = candidates.key AND '.$condition.' ORDER BY sequence DESC LIMIT 1) AS version', $bindings);
+        return $query->whereIn('key', $keys)->get(['key', 'state', 'sequence'])->all();
     }
 
     /** @param array<array-key, mixed> $descriptor */

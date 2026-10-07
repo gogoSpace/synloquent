@@ -38,11 +38,11 @@ class SynloquentCryptoModule(context: ReactApplicationContext) : NativeSynloquen
         level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE -> "warning"
         else -> return
       }
-      reportMemoryPressure(kind)
+      reportMemoryPressure(kind, "onTrimMemory", level)
     }
 
     @Deprecated("Legacy callback is not delivered on Android 14 and later.")
-    override fun onLowMemory() = reportMemoryPressure("critical")
+    override fun onLowMemory() = reportMemoryPressure("critical", "onLowMemory", null)
   }
   private val contexts = mutableMapOf<String, HashContext>()
   private val worker = Executors.newSingleThreadExecutor { operation ->
@@ -67,11 +67,13 @@ class SynloquentCryptoModule(context: ReactApplicationContext) : NativeSynloquen
 
   override fun threadCpuMilliseconds(): Double = Debug.threadCpuTimeNanos().toDouble() / 1000000
 
-  private fun reportMemoryPressure(kind: String) {
+  private fun reportMemoryPressure(kind: String, source: String, trimMemoryLevel: Int?) {
     synchronized(memoryObservationLock) {
       if (invalidated.get() || !memoryObservationStarted || mEventEmitterCallback == null) return
       emitOnMemoryPressure(Arguments.createMap().apply {
         putString("kind", kind)
+        putString("source", source)
+        if (trimMemoryLevel != null) putDouble("trimMemoryLevel", trimMemoryLevel.toDouble())
         putDouble("observedAtMonotonicMilliseconds", SystemClock.elapsedRealtimeNanos().toDouble() / 1000000)
       })
     }

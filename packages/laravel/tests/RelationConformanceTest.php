@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Synloquent\Laravel\Export\ExportDefinition;
@@ -83,7 +82,7 @@ final class RelationConformanceTest extends TestCase
         $this->assertSame([['id' => 'target:custom', 'attributes' => ['position' => 7]]], $receipt['relationSets'][0]['targets']);
         $computed = $this->app->make(QueryAction::class)->execute(['model' => 'FixtureOwner', 'relationAggregates' => [['relation' => 'children', 'function' => 'sum', 'field' => 'amount'], ['relation' => 'children', 'function' => 'avg', 'field' => 'amount'], ['relation' => 'children', 'function' => 'min', 'field' => 'rank'], ['relation' => 'children', 'function' => 'max', 'field' => 'rank']]], $this->actor());
         $this->assertSame(['children_sum_amount' => '0.40', 'children_avg_amount' => '0.10', 'children_min_rank' => 1, 'children_max_rank' => 3], $computed['computed']['FixtureOwner:owner:custom']['aggregates']);
-        DB::statement('ALTER TABLE fixture_children ALTER COLUMN rank TYPE bigint');
+        Schema::table('fixture_children', static fn (Blueprint $table) => $table->bigInteger('rank')->change());
         FixtureChild::query()->update(['rank' => 4503599627370496]);
         $unsafe = $this->app->make(QueryAction::class)->execute(['model' => 'FixtureOwner', 'relationAggregates' => [['relation' => 'children', 'function' => 'avg', 'field' => 'rank']]], $this->actor());
         $this->assertSame('4503599627370496', $unsafe['computed']['FixtureOwner:owner:custom']['aggregates']['children_avg_rank']);

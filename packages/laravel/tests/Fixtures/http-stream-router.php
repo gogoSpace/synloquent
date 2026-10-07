@@ -10,11 +10,13 @@ use Synloquent\Laravel\Sync\StageProfiler;
 
 $repository = dirname(__DIR__, 4);
 $cleanupBootstrapCaches = require __DIR__.'/isolated-bootstrap-cache.php';
-require getenv('SYNLOQUENT_TEST_AUTOLOAD') ?: $repository.'/examples/laravel/vendor/autoload.php';
+$loader = require getenv('SYNLOQUENT_TEST_AUTOLOAD') ?: $repository.'/packages/laravel/vendor/autoload.php';
+$loader->addPsr4('App\\', $repository.'/examples/laravel/app');
 $application = require $repository.'/examples/laravel/bootstrap/app.php';
 $application->make(Kernel::class)->bootstrap();
 $cleanupBootstrapCaches();
-$application['config']->set('database.connections.pgsql.database', getenv('SYNLOQUENT_TEST_DATABASE') ?: 'synloquent_test');
+(require __DIR__.'/database.php')($application);
+(require __DIR__.'/connection-evidence.php')($application);
 $application['config']->set('synloquent.cursor_secret', 'synthetic-tests-stable-cursor-secret');
 $application['config']->set('synloquent.profile_snapshots', false);
 $directory = getenv('SYNLOQUENT_TEST_ARTIFACTS');
@@ -50,7 +52,7 @@ if (in_array($failure, ['catalog', 'membership', 'persistence'], true)) {
         if ($stage === 'snapshot.schemaValidation') {
             $validationCount++;
         }
-        if (($failure === 'catalog' && $stage === 'snapshot.schemaValidation' && $validationCount === 5) || ($failure === 'membership' && $stage === 'membership.copy') || ($failure === 'persistence' && $stage === 'snapshot.contentPersistence')) {
+        if (($failure === 'catalog' && $stage === 'snapshot.schemaValidation' && $validationCount === 5) || ($failure === 'membership' && in_array($stage, ['membership.copy', 'membership.insert'], true)) || ($failure === 'persistence' && $stage === 'snapshot.contentPersistence')) {
             throw new ProtocolException('invalid_snapshot', 'Injected HTTP snapshot '.$failure.' failure.');
         }
     });

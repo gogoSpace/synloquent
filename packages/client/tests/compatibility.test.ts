@@ -3,6 +3,9 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
+import { DatabaseSync } from 'node:sqlite'
+import type { SynloquentClient } from '../src/core/client.js'
+import { quoteIdentifier } from '../src/core/database.js'
 import { createSynloquent, SynloquentError } from '../src/index.js'
 import type { Manifest, WireValue } from '../src/index.js'
 import { configuration, item, manifest, snapshotFor } from './fixtures.js'
@@ -89,6 +92,237 @@ test('C54 compatible online field backfill is atomic, retains pending edits and 
     await rm(directory, { recursive: true, force: true })
   }
 })
+
+function durableSchemaState(filename: string) {
+  const database = new DatabaseSync(filename, { readOnly: true })
+  try {
+    const schema = database
+      .prepare('SELECT type, name, sql FROM sqlite_master ORDER BY type, name')
+      .all()
+    const tables = database
+      .prepare(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name != 'sqlite_sequence' ORDER BY name",
+      )
+      .all()
+    return {
+      schema,
+      tables: Object.fromEntries(
+        tables.map(({ name }) => [
+          String(name),
+          database
+            .prepare(`SELECT * FROM ${quoteIdentifier(String(name))}`)
+            .all(),
+        ]),
+      ),
+    }
+  } finally {
+    database.close()
+  }
+}
+
+for (const scenario of [
+  'rollback',
+  'listener failure',
+  'in-flight visibility',
+] as const) {
+  test(`C54 manifest COMMIT boundary: ${scenario}`, async () => {
+    const directory = await mkdtemp(
+      join(tmpdir(), 'synloquent-manifest-commit-'),
+    )
+    const filename = join(directory, 'schema.sqlite')
+    const server = testTransport()
+    const next: Manifest = {
+      ...manifest,
+      fingerprint: 'fixture-v2',
+      schemaVersion: 2,
+      models: {
+        ...manifest.models,
+        Item: {
+          ...manifest.models.Item!,
+          fields: {
+            ...manifest.models.Item!.fields,
+            rank: {
+              type: 'integer',
+              nullable: true,
+              readable: true,
+              writable: true,
+            },
+          },
+          indexes: [...manifest.models.Item!.indexes!, ['rank']],
+        },
+      },
+    }
+    server.transport.manifest = async () => next
+    server.transport.snapshot = async () =>
+      snapshotFor([item('1', { name: 'New canonical title', rank: 7 })], next)
+    const settings = configuration(filename, server.transport)
+    const transaction = settings.database.transaction.bind(settings.database)
+    let armed = false
+    let releaseCommit = () => {}
+    let reachCommit = () => {}
+    const commitGate = new Promise<void>((resolve) => {
+      releaseCommit = resolve
+    })
+    const atCommit = new Promise<void>((resolve) => {
+      reachCommit = resolve
+    })
+    settings.database.transaction = (callback, mode) =>
+      transaction(async (executor) => {
+        const result = await callback(executor)
+        if (armed && mode === 'write') {
+          armed = false
+          reachCommit()
+          await commitGate
+          if (scenario === 'rollback') {
+            // DML succeeds. SQLite rejects the real COMMIT and the adapter rolls back.
+            await executor.execute(
+              'CREATE TABLE commit_parent (identity INTEGER PRIMARY KEY)',
+            )
+            await executor.execute(
+              'CREATE TABLE commit_child (parent INTEGER REFERENCES commit_parent(identity) DEFERRABLE INITIALLY DEFERRED)',
+            )
+            await executor.execute(
+              'INSERT INTO commit_child(parent) VALUES (1)',
+            )
+            assert.equal(
+              (await executor.execute('PRAGMA foreign_key_check')).rows.length,
+              1,
+            )
+          }
+        }
+        return result
+      }, mode)
+    let client: SynloquentClient | undefined
+    try {
+      client = await createSynloquent(settings)
+      await client.sync.installSnapshot(
+        snapshotFor([item('1', { name: 'Original title' })]),
+      )
+      const local = await client.models.Item!.findOrFail(1)
+      await local.update({ name: 'Retained offline title' })
+      const pendingCreate = await client.models.Item!.create({
+        name: 'Pending create',
+      })
+      const originalManifest = client.storage.manifest
+      const before = durableSchemaState(filename)
+      const pending = await client.storage.read((executor) =>
+        client!.storage.pending(executor),
+      )
+      const generation = client.storage.owner.generation
+      let notifications = 0
+      let notificationManifest: Manifest | undefined
+      let notificationState: ReturnType<typeof durableSchemaState> | undefined
+      const listenerFailure = new Error('Subscriber failed after COMMIT')
+      client.storage.owner.subscribe(() => {
+        notifications++
+        notificationManifest = client!.storage.manifest
+        notificationState = durableSchemaState(filename)
+        if (scenario === 'listener failure') throw listenerFailure
+      })
+      armed = true
+      const upgrade = client.sync.updateManifest('default')
+      const outcome = upgrade.then(
+        (value) => ({ value, error: undefined }),
+        (error: unknown) => ({ value: undefined, error }),
+      )
+      await Promise.race([
+        atCommit,
+        outcome.then(() => {
+          throw new Error('Upgrade ended before the COMMIT barrier')
+        }),
+      ])
+      const inFlightManifest = client.storage.manifest
+      const inFlightEnvelope = client.sync.envelope(
+        'query',
+        {},
+      ).schemaFingerprint
+      const inFlightDurable = durableSchemaState(filename)
+      let queuedReadFinished = false
+      const queuedRead = client.storage.read(async (executor) => {
+        queuedReadFinished = true
+        return {
+          manifest: client!.storage.manifest,
+          metadata: await client!.storage.metadata('manifest', executor),
+        }
+      })
+      await Promise.resolve()
+      const serialized = !queuedReadFinished
+      releaseCommit()
+      const result = await outcome
+      const queued = await queuedRead
+      const after = durableSchemaState(filename)
+      const expectedManifest = scenario === 'rollback' ? originalManifest : next
+      if (scenario === 'rollback') {
+        assert.match(String(result.error), /FOREIGN KEY constraint failed/)
+        assert.deepEqual(after, before)
+        assert.equal(notifications, 0)
+        assert.equal(client.storage.owner.generation, generation)
+      } else {
+        if (scenario === 'listener failure')
+          assert.equal(result.error, listenerFailure)
+        else assert.equal(result.value, true)
+        assert.equal(notifications, 1)
+        assert.deepEqual(notificationManifest, next)
+        assert.deepEqual(notificationState, after)
+        assert.equal(client.storage.owner.generation, generation + 1)
+        assert.equal(
+          (await client.models.Item!.where('rank', 7).get()).length,
+          1,
+        )
+      }
+      assert.deepEqual(client.storage.manifest, expectedManifest)
+      assert.deepEqual(queued.manifest, expectedManifest)
+      assert.deepEqual(JSON.parse(queued.metadata!), expectedManifest)
+      assert.equal(serialized, true)
+      assert.deepEqual(inFlightDurable, before)
+      assert.equal(
+        (await client.models.Item!.findOrFail(local.localIdentity)).attributes
+          .name,
+        'Retained offline title',
+      )
+      assert.equal(
+        (await client.models.Item!.findOrFail(pendingCreate.localIdentity))
+          .attributes.name,
+        'Pending create',
+      )
+      assert.deepEqual(
+        await client.storage.read((executor) =>
+          client!.storage.pending(executor),
+        ),
+        pending,
+      )
+      await client.close()
+      client = await createSynloquent(configuration(filename))
+      assert.deepEqual(client.storage.manifest, expectedManifest)
+      assert.deepEqual(durableSchemaState(filename), after)
+      assert.equal(
+        (await client.models.Item!.findOrFail(local.localIdentity)).attributes
+          .name,
+        'Retained offline title',
+      )
+      assert.equal(
+        (await client.models.Item!.findOrFail(pendingCreate.localIdentity))
+          .attributes.name,
+        'Pending create',
+      )
+      assert.deepEqual(
+        await client.storage.read((executor) =>
+          client!.storage.pending(executor),
+        ),
+        pending,
+      )
+      if (scenario === 'in-flight visibility') {
+        assert.equal(inFlightManifest, originalManifest)
+        assert.equal(inFlightEnvelope, originalManifest.fingerprint)
+      }
+    } finally {
+      releaseCommit()
+      if (client) await client.close()
+      else await settings.database.close()
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+}
 
 test('C54 unknown required engine capability, malformed indexes and breaking field changes fail closed', async () => {
   for (const schema of [

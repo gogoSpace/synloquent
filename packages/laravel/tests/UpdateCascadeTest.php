@@ -197,7 +197,7 @@ final class UpdateCascadeTest extends TestCase
                 return;
             }
             $queries[$event->sql] = ($queries[$event->sql] ?? 0) + 1;
-            if (str_contains($event->sql, '"synloquent_streams"') && str_contains($event->sql, 'for update')) {
+            if (str_contains($event->sql, 'synloquent_streams') && str_contains($event->sql, 'for update')) {
                 $acquired = hrtime(true);
             }
         });
@@ -211,7 +211,7 @@ final class UpdateCascadeTest extends TestCase
         $ended = hrtime(true);
         $active = false;
         $this->assertLessThanOrEqual(24, array_sum($queries), 'Cascade SQL must scale with registered frontiers rather than descendants.');
-        $this->assertSame(1, array_sum(array_filter($queries, fn (string $sql): bool => str_starts_with($sql, 'INSERT INTO "synloquent_revisions"'), ARRAY_FILTER_USE_KEY)));
+        $this->assertSame(1, array_sum(array_filter($queries, fn (string $sql): bool => str_starts_with(strtolower($sql), 'insert into '.DB::connection()->getQueryGrammar()->wrapTable('synloquent_revisions')) && str_contains($sql, '), ('), ARRAY_FILTER_USE_KEY)));
         $this->assertSame('accepted', $receipt['status']);
         $this->assertNotNull($acquired);
         $this->assertNotNull($committed);
@@ -236,7 +236,7 @@ final class UpdateCascadeTest extends TestCase
             if (! preg_match('/^[a-z0-9-]+$/D', $label)) {
                 throw new \RuntimeException('Invalid task-owned profile label.');
             }
-            file_put_contents(dirname(__DIR__, 3).'/.local/test-results/server-update-fanout-'.$label.'-'.$count.'.json', json_encode($profile, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR)."\n");
+            file_put_contents(dirname(__DIR__, 3).'/.agentic/artifacts/server-update-fanout-'.$label.'-'.$count.'.json', json_encode($profile, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR)."\n");
         }
     }
 
@@ -275,7 +275,7 @@ final class UpdateCascadeTest extends TestCase
             $baselinePull = $this->app->make(PullAction::class)->execute($snapshot['cursor'], 'catalog', $this->actor());
             $stale = $this->operation('cascade-baseline-stale-child', 'update', ['title' => 'Stale accepted write'], ['model' => 'UpdateChild', 'id' => (string) $child->id, 'expectedRevision' => '1']);
             $baseline = ['databaseVersion' => DB::selectOne('SELECT version() AS version')->version, 'parentStatus' => $receipt['status'], 'childForeignKey' => $child->owner_code, 'childExactKey' => (string) $child->owner_number, 'leafForeignKey' => $leaf->owner_code, 'childRevision' => $revisions->get($this->actor()->stream(), 'UpdateChild', (string) $child->id), 'leafRevision' => $revisions->get($this->actor()->stream(), 'UpdateLeaf', (string) $leaf->id), 'journalModels' => array_column($journal, 'model'), 'pullModels' => array_column($baselinePull['batches'][0]['changes'], 'model'), 'staleChildStatus' => $this->app->make(MutationAction::class)->execute([$stale], $this->actor())['receipts'][0]['status'], 'mutationSourceHash' => hash_file('sha256', __DIR__.'/../src/Sync/MutationAction.php'), 'contextSourceHash' => hash_file('sha256', __DIR__.'/../src/Sync/WriteContext.php')];
-            file_put_contents(dirname(__DIR__, 3).'/.local/test-results/server-update-cascade-baseline.json', json_encode($baseline, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR)."\n");
+            file_put_contents(dirname(__DIR__, 3).'/.agentic/artifacts/server-update-cascade-baseline.json', json_encode($baseline, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR)."\n");
         }
         $this->assertSame('2', $revisions->get($this->actor()->stream(), 'UpdateChild', (string) $child->id));
         $this->assertSame('2', $revisions->get($this->actor()->stream(), 'UpdateLeaf', (string) $leaf->id));
@@ -364,9 +364,22 @@ final class UpdateCascadeTest extends TestCase
             array_push($models, $child, $leaf);
         }
         $this->app->make(WriteGateway::class)->transaction($this->actor(), fn (WriteContext $context) => $context->captureMany($models));
+        if (DB::connection()->getDriverName() !== 'pgsql') {
+            $overlapping = $this->operation('cascade-overlapping-native-keys', 'update', ['natural_key' => 'overlapping-key'], ['model' => 'UpdateOwner', 'id' => (string) $owner->id, 'expectedRevision' => '1']);
+            $rejection = $this->app->make(MutationAction::class)->execute([$overlapping], $this->actor())['receipts'][0];
+            $this->assertSame('rejected', $rejection['status']);
+            $this->assertSame('validation_failed', $rejection['error']['code']);
+            $this->assertSame('23000', $rejection['error']['details']['sqlState']);
+            $this->assertSame('00106', $owner->refresh()->natural_key);
+            $this->assertSame(2, UpdateChild::where('owner_code', '00106')->count());
+            $this->assertSame(2, UpdateLeaf::where('owner_code', '00106')->count());
+            $this->assertSame(5, DB::table('synloquent_revisions')->where('revision', 1)->count());
+            $this->assertSame(1, DB::table('synloquent_publications')->count());
+            Schema::table('fixture_update_leaves', static fn (Blueprint $table) => $table->dropForeign(['child_id', 'owner_code']));
+        }
         $tupleQueries = [];
         DB::listen(static function (QueryExecuted $event) use (&$tupleQueries): void {
-            if (str_starts_with($event->sql, 'select * from "fixture_update_leaves"') && str_contains($event->sql, '"child_title"')) {
+            if (str_starts_with($event->sql, 'select * from '.DB::connection()->getQueryGrammar()->wrapTable('fixture_update_leaves')) && str_contains($event->sql, DB::connection()->getQueryGrammar()->wrap('child_title'))) {
                 $tupleQueries[] = $event->sql;
             }
         });
@@ -374,7 +387,8 @@ final class UpdateCascadeTest extends TestCase
         $receipt = $this->app->make(MutationAction::class)->execute([$operation], $this->actor())['receipts'][0];
         $this->assertSame('accepted', $receipt['status']);
         $this->assertCount(1, $tupleQueries);
-        $this->assertStringContainsString('"child_id" = ? and "child_title" = ?) or ("child_id" = ? and "child_title" = ?', $tupleQueries[0]);
+        $grammar = DB::connection()->getQueryGrammar();
+        $this->assertStringContainsString($grammar->wrap('child_id').' = ? and '.$grammar->wrap('child_title').' = ?) or ('.$grammar->wrap('child_id').' = ? and '.$grammar->wrap('child_title').' = ?', $tupleQueries[0]);
         $this->assertSame(2, UpdateLeaf::where('owner_code', 'paired-key')->count());
         $this->assertSame(['Left', 'Right'], UpdateLeaf::orderBy('id')->pluck('child_title')->all());
         $this->assertSame(5, DB::table('synloquent_revisions')->where('revision', 2)->count());
@@ -411,7 +425,7 @@ final class UpdateCascadeTest extends TestCase
         $active = true;
         $pivotQueries = [];
         DB::listen(static function (QueryExecuted $event) use (&$active, &$pivotQueries): void {
-            if ($active && (str_starts_with($event->sql, 'select distinct "item_id" from "item_tag"') || str_starts_with($event->sql, 'select distinct "taggable_id" from "taggables"'))) {
+            if ($active && (str_starts_with($event->sql, 'select distinct '.DB::connection()->getQueryGrammar()->wrap('item_id').' from '.DB::connection()->getQueryGrammar()->wrapTable('item_tag')) || str_starts_with($event->sql, 'select distinct '.DB::connection()->getQueryGrammar()->wrap('taggable_id').' from '.DB::connection()->getQueryGrammar()->wrapTable('taggables')))) {
                 $pivotQueries[] = $event->sql;
             }
         });
@@ -424,7 +438,7 @@ final class UpdateCascadeTest extends TestCase
         });
         $active = false;
         $this->assertCount(2, $pivotQueries, 'Each declared incoming relation must use one bounded target lookup.');
-        $this->assertStringContainsString('"taggable_type" = ?', $pivotQueries[1]);
+        $this->assertStringContainsString(DB::connection()->getQueryGrammar()->wrap('taggable_type').' = ?', $pivotQueries[1]);
         $journal = json_decode(DB::table('synloquent_publications')->orderByDesc('sequence')->value('changes'), true, flags: JSON_THROW_ON_ERROR);
         $relations = array_values(array_filter($journal, fn (array $change): bool => $change['kind'] === 'relation'));
         $this->assertCount(4, $relations);
@@ -655,7 +669,7 @@ final class UpdateCascadeTest extends TestCase
             $table->id();
             $table->bigInteger('tenant_id');
             $table->string('natural_key')->unique();
-            $table->bigInteger('exact_key')->unique();
+            $table->unsignedBigInteger('exact_key')->unique();
             $table->string('title');
         });
         Schema::create('fixture_update_children', function (Blueprint $table): void {
@@ -663,7 +677,7 @@ final class UpdateCascadeTest extends TestCase
             $table->bigInteger('tenant_id');
             $table->bigInteger('actor_id')->default(1);
             $table->string('owner_code');
-            $table->bigInteger('owner_number');
+            $table->unsignedBigInteger('owner_number');
             $table->string('title');
             $table->unique(['id', 'owner_code']);
             $table->foreign('owner_code')->references('natural_key')->on('fixture_update_owners')->cascadeOnUpdate();
@@ -672,7 +686,7 @@ final class UpdateCascadeTest extends TestCase
         Schema::create('fixture_update_leaves', function (Blueprint $table): void {
             $table->id();
             $table->bigInteger('tenant_id');
-            $table->bigInteger('child_id');
+            $table->foreignId('child_id');
             $table->string('owner_code');
             $table->string('title');
             $table->foreign(['child_id', 'owner_code'])->references(['id', 'owner_code'])->on('fixture_update_children')->cascadeOnUpdate();

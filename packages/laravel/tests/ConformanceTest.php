@@ -16,6 +16,7 @@ use App\Models\Series;
 use App\Models\Tag;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -63,7 +64,7 @@ final class ConformanceTest extends TestCase
         $action = $this->app->make(QueryAction::class);
         $query = ['model' => 'Item', 'scopes' => [['name' => 'metadataContains', 'arguments' => ['value' => ['region' => 'synthetic']]]]];
         $this->assertSame(['1', '2', '3'], array_column($action->execute($query, $this->actor())['records'], 'id'));
-        $expression = collect($queries)->first(fn ($query) => str_contains($query['sql'], '::jsonb @> ?'));
+        $expression = collect($queries)->first(fn ($query) => str_contains($query['sql'], DB::connection()->getDriverName() === 'pgsql' ? '::jsonb @> ?' : 'json_contains('));
         $this->assertNotNull($expression);
         $this->assertContains('{"region":"synthetic"}', $expression['bindings']);
         $queries = [];
@@ -582,7 +583,7 @@ final class ConformanceTest extends TestCase
 
     public function test_unsafe_integer_and_decimal_aggregates_keep_exact_wire_values(): void
     {
-        DB::statement('ALTER TABLE items ALTER COLUMN quantity TYPE bigint');
+        DB::connection()->getSchemaBuilder()->table('items', static fn (Blueprint $table) => $table->bigInteger('quantity')->default(0)->change());
         foreach (range(1, 3) as $identity) {
             Item::create(['tenant_id' => 1, 'title' => 'Exact '.$identity, 'quantity' => 4503599627370496, 'price' => '0.10', 'active' => true]);
         }

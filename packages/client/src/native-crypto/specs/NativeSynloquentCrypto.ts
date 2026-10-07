@@ -17,6 +17,8 @@ export type NativeMemorySample = {
 }
 
 export type NativeMemoryPressure = {
+  source?: string
+  trimMemoryLevel?: number
   kind: string
   observedAtMonotonicMilliseconds: number
 }

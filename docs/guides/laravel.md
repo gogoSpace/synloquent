@@ -2,6 +2,8 @@
 
 Synloquent exports explicitly registered Eloquent resources through an authenticated protocol endpoint. The package owns validation, scoped query compilation, mutation receipts, commit ordering, bounded snapshots and a durable effect outbox. The host owns policies, dataset membership, trusted attribute preparation and complete capture of every exported write.
 
+The beta supports the tested Laravel 12.55.1 and 13.34.0 versions with PHP 8.4.7, PostgreSQL 18.3 and MariaDB 11.7.2. See [compatibility](compatibility.md) for exact database constraints.
+
 ## Install and register
 
 For a local checkout, add a Composer path repository for `packages/laravel` and require `synloquent/laravel`. The package advertises its provider through Composer discovery. Its runtime dependencies and licenses are recorded in the dependency architecture decision. No package publication is required to run this repository.
@@ -72,7 +74,7 @@ All exported instance writes, bulk updates and deletes, pivots, database cascade
 $gateway->transaction($actor, function (WriteContext $context) use ($actor): void {
     $item = Item::query()->lockForUpdate()->findOrFail(1);
     Gate::forUser($actor->user)->authorize('update', $item);
-    $item->title = 'Updated stamp';
+    $item->title = 'Updated product';
     if (! $context->save($item)) {
         return;
     }
@@ -113,9 +115,7 @@ Unknown dependencies and authorization invalidation take a conservative material
 
 The PostgreSQL benchmark compares 7,000 and 117,000 canonical records. Unchanged pull uses five SQL operations, and bounded single-row and 100-row changes use twenty. Development samples measured roughly 2–5 ms unchanged, 9–12 ms for one edit and 27 ms for 100 edits, with no additional allocated-memory growth relative to the post-snapshot baseline. Actual writer barriers preserve the subsequent anchored tail. These are synthetic observations, not deployment latency promises.
 
-Public HTTP and CLI snapshots now encode, validate and initialize historical membership in bounded batches through an owned spool. The earlier full catalog implementation measured about 519 MiB and scanned the whole catalog on every poll. The current HTTP development fixture contains 117,115 records, 51,128 directed relation sets and 28.64 MB of canonical bytes. Cold creation measured 10.62 seconds, 30.38 MB logical peak and 53.82 MB allocated peak under the default 128 MiB PHP limit. A warm content reuse measured 8.91 seconds and skips blob readback and insertion. Authenticated download measured about 4.63 seconds. Whole-lifecycle hooks run after response send, and an independent sampler measures the owned worker RSS separately. RSS includes native driver buffers and allocator retention, so it exceeds logical PHP live memory. Final exact-candidate reports supersede these development observations. Snapshot construction remains O(dataset) and holds the stream lock. It is an initial or recovery operation, while normal polling scales with captured changes.
-
-The structured performance artifact includes both sizes, actual row counts, resident memory, peak growth, SQL profiles, stream lock duration and PostgreSQL `EXPLAIN ANALYZE` plans for Item, pivot and historical membership lookups. Planner statistics are refreshed outside measured operations after bulk fixture insertion. Historical membership uses per-key indexed version lookup, and the PHP 8.4 PostgreSQL driver uses transactional bounded COPY chunks for fresh membership initialization. Other supported PDO variants use bounded inserts. A killed or rolled-back initialization leaves neither state nor membership rows committed.
+Public HTTP and CLI snapshots encode, validate and initialize historical membership in batches through an owned spool. Snapshot construction remains proportional to the dataset and holds the stream lock. It is an initial or recovery operation, while normal polling uses captured changes. Measure the initial import against representative application data.
 
 Snapshot construction acquires the stream lock before reading the domain. It atomically persists canonical content, subscription membership, base cursor and an actor/device/epoch download grant. Its digest is SHA-256 of canonical `{records, relationSets}` bytes. Metadata is validated independently. Snapshot generation includes the actual opaque cursor, content digest, scope, dataset generation and actor partition, so unchanged content with different metadata has a different immutable URL.
 
@@ -131,19 +131,6 @@ Commands append external intentions with `WriteContext::effect()` rather than ex
 
 An `idempotent` destination must persist the supplied idempotency key in the downstream system. A worker can die after external delivery and before acknowledgement, so that destination sees the same key on retry. A destination declared `at_least_once` may visibly repeat the effect. The fixture includes both a downstream idempotent implementation and a deliberate duplicate-producing control. Queue status alone does not establish exactly-once external delivery.
 
-## Reproduce verification
+## Development checks
 
-```sh
-cd packages/laravel
-vendor/bin/phpunit
-vendor/bin/phpstan analyse --memory-limit=1G --no-progress
-vendor/bin/pint --test
-```
-
-Tests use real PostgreSQL commits, independent PHP processes, actual HTTP servers, explicit barriers and actual backend lock state. HTTP stream recovery tests inject catalog, membership and content-persistence failures, verify transactional rollback and spool cleanup, and verify lock release through a subsequent real HTTP write. They cover mutation rollback, commit order, death before commit, lost response replay, death after external success, snapshot lock order, immutable anchored tails, strict HTTP validation, current authorization and download corruption. They do not wrap those recovery tests in an outer test transaction.
-
-Run `vendor/bin/phpunit --filter '(UpdateCascadeTest|DeletionStreamTest)'` for referential update and deletion controls. To emit new task-owned update fan-out measurements, set `SYNLOQUENT_UPDATE_FANOUT_PROFILE=1` and a distinct `SYNLOQUENT_UPDATE_FANOUT_LABEL`, then run `vendor/bin/phpunit --filter update_descendants_profile`. Preserve the existing baseline files when comparing a new candidate. The tests verify recursive composite keys, exact unsafe integer keys and revisions, bulk event semantics, atomic rollback, actor-private same-stream capture, current pull authorization and rejection of unknown or foreign stream dependencies.
-
-Set `SYNLOQUENT_TEST_DATABASE` for an isolated task database and `SYNLOQUENT_TEST_AUTOLOAD` for a separate installed consumer. Create `synloquent_performance_laravel` in the task cluster, then run the large benchmark with `php packages/laravel/tests/Fixtures/performance.php`. Its reset guard rejects database names outside `synloquent_performance_`.
-
-Current limitations remain explicit. The production database witness is PostgreSQL 18.3. Initial snapshot stream lock duration still requires a host workload decision. The internal array-returning snapshot action materializes its result and is intended for callers that explicitly need an in-memory document. Public HTTP, download and CLI paths use bounded batch processing. Default unknown-dependency exports use a bounded fallback and resnapshot rather than the normal incremental path. The matching bundled RN transport requests authenticated immutable `parts-v1` snapshots. Whole-document snapshot and download paths remain available. Snapshot transfer currently has no compressed wire format. Arbitrary PHP execution, arbitrary SQL, unnamed commands, external writers without gateway capture and nonphysical server SQL predicates are outside the supported runtime contract.
+Use a disposable local database for package tests. See [development and testing](../development.md) for the connection environment and commands. The [compatibility guide](compatibility.md) describes supported PostgreSQL and MariaDB versions, exact identity requirements, migration upgrades and engine-specific constraints.

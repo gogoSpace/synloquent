@@ -16,18 +16,20 @@ use Synloquent\Laravel\Sync\WriteGateway;
 
 $repository = dirname(__DIR__, 4);
 $cleanupBootstrapCaches = require __DIR__.'/isolated-bootstrap-cache.php';
-require getenv('SYNLOQUENT_TEST_AUTOLOAD') ?: $repository.'/examples/laravel/vendor/autoload.php';
+$loader = require getenv('SYNLOQUENT_TEST_AUTOLOAD') ?: $repository.'/packages/laravel/vendor/autoload.php';
+$loader->addPsr4('App\\', $repository.'/examples/laravel/app');
 $application = require $repository.'/examples/laravel/bootstrap/app.php';
 $application->make(Kernel::class)->bootstrap();
 $cleanupBootstrapCaches();
-$application['config']->set('database.connections.pgsql.database', getenv('SYNLOQUENT_TEST_DATABASE') ?: 'synloquent_test');
+(require __DIR__.'/database.php')($application);
 $application['config']->set('synloquent.cursor_secret', 'synthetic-tests-stable-cursor-secret');
 $actor = new ActorContext('1', '1', 'epoch-1', '1', User::find(1), 'example-device');
 $mode = $argv[1];
-$backend = $application['db']->connection()->selectOne('select pg_backend_pid() as identity')->identity;
+$databaseIdentity = (require __DIR__.'/connection-evidence.php')($application);
+$backend = $databaseIdentity['backend'];
 if ($mode === 'performanceWriter') {
     $application->make(ManifestBuilder::class)->build();
-    fwrite(STDOUT, json_encode(['stage' => 'ready', 'backend' => $backend])."\n");
+    fwrite(STDOUT, json_encode([...$databaseIdentity, 'stage' => 'ready', 'backend' => $backend])."\n");
     fflush(STDOUT);
     if (trim(fgets(STDIN)) !== 'release') {
         throw new RuntimeException('Performance writer barrier ended without release.');
@@ -41,15 +43,15 @@ if ($mode === 'performanceWriter') {
         $model->save();
         $context->capture($model);
     });
-    fwrite(STDOUT, json_encode(['stage' => 'committed', 'lockWaitSeconds' => $waitSeconds])."\n");
+    fwrite(STDOUT, json_encode([...$databaseIdentity, 'stage' => 'committed', 'lockWaitSeconds' => $waitSeconds])."\n");
     fflush(STDOUT);
     exit(0);
 }
 if ($mode === 'snapshot') {
-    fwrite(STDOUT, json_encode(['stage' => 'attempting', 'backend' => $backend])."\n");
+    fwrite(STDOUT, json_encode([...$databaseIdentity, 'stage' => 'attempting', 'backend' => $backend])."\n");
     fflush(STDOUT);
     $snapshot = $application->make(SnapshotAction::class)->execute('catalog', $actor);
-    fwrite(STDOUT, json_encode(['stage' => 'materialized', 'snapshot' => $snapshot], JSON_THROW_ON_ERROR)."\n");
+    fwrite(STDOUT, json_encode([...$databaseIdentity, 'stage' => 'materialized', 'snapshot' => $snapshot], JSON_THROW_ON_ERROR)."\n");
     fflush(STDOUT);
     exit(0);
 }
@@ -67,16 +69,24 @@ if ($mode === 'lostCommandResponse') {
     $application->make(CommandAction::class)->execute(['name' => 'increaseQuantity', 'operationId' => 'lost-command-response', 'arguments' => ['item_id' => '1', 'delta' => 4]], $actor);
     exit(24);
 }
+if ($mode === 'duplicate') {
+    fwrite(STDOUT, json_encode([...$databaseIdentity, 'stage' => 'attempting'])."\n");
+    fflush(STDOUT);
+    $result = $application->make(MutationAction::class)->execute([['operationId' => 'concurrent-duplicate', 'model' => 'Item', 'localIdentity' => 'local-concurrent-duplicate', 'action' => 'create', 'values' => ['title' => 'Concurrent duplicate'], 'dependsOn' => []]], $actor);
+    fwrite(STDOUT, json_encode([...$databaseIdentity, 'stage' => 'committed', 'result' => $result], JSON_THROW_ON_ERROR)."\n");
+    fflush(STDOUT);
+    exit(0);
+}
 if ($mode === 'second') {
-    fwrite(STDOUT, json_encode(['stage' => 'attempting', 'backend' => $backend])."\n");
+    fwrite(STDOUT, json_encode([...$databaseIdentity, 'stage' => 'attempting', 'backend' => $backend])."\n");
     fflush(STDOUT);
 }
-$application->make(WriteGateway::class)->transaction($actor, function (WriteContext $context) use ($mode, $backend): void {
+$application->make(WriteGateway::class)->transaction($actor, function (WriteContext $context) use ($mode, $backend, $databaseIdentity): void {
     if ($mode !== 'second') {
         if ($mode === 'beforeCommit') {
             $context->capture(Item::create(['title' => 'Killed transaction', 'tenant_id' => 1]));
         }
-        fwrite(STDOUT, json_encode(['stage' => 'locked', 'backend' => $backend])."\n");
+        fwrite(STDOUT, json_encode([...$databaseIdentity, 'stage' => 'locked', 'backend' => $backend])."\n");
         fflush(STDOUT);
         if (trim(fgets(STDIN)) !== 'release') {
             throw new RuntimeException('Barrier ended without release.');
@@ -86,5 +96,5 @@ $application->make(WriteGateway::class)->transaction($actor, function (WriteCont
         $context->capture(Item::create(['title' => 'Concurrent '.$mode, 'tenant_id' => 1]));
     }
 });
-fwrite(STDOUT, json_encode(['stage' => 'committed'])."\n");
+fwrite(STDOUT, json_encode([...$databaseIdentity, 'stage' => 'committed'])."\n");
 fflush(STDOUT);

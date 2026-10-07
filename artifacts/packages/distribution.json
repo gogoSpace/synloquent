@@ -1,10 +1,10 @@
 {
   "server": {
-    "archive": "synloquent-laravel-0.1.0-6c944b64a6936a7b.zip",
-    "sha256": "6c944b64a6936a7b5fb3629a718a9f60fb325c74ee9bfd79eeb597e056604629"
+    "archive": "synloquent-laravel-0.1.0-b96bcf4c877892cd.zip",
+    "sha256": "b96bcf4c877892cd60c08b19e8a493612d901297372d514ef46d6b2f6d77c029"
   },
   "client": {
-    "archive": "synloquent-client-0.1.0-eaa8a74731c5329a.tgz",
-    "sha256": "eaa8a74731c5329a3d65665d6308e449df8dbf21b2358845e32e2979c32cd4ff"
+    "archive": "synloquent-client-0.1.0-bccd7e1fdf4d2444.tgz",
+    "sha256": "bccd7e1fdf4d2444029d54b34c198426e0a7bf2cef188c4ec8aabe01596b7c68"
   }
 }

@@ -108,7 +108,9 @@ final class HavingCompiler
             throw new ProtocolException('unknown_field', 'HAVING field must be a declared grouped field.');
         }
 
-        return $grammar->wrap($fields[$field]['column'] ?? $field).($fields[$field]['type'] === 'string' ? ' COLLATE "C"' : '');
+        $column = $grammar->wrap($fields[$field]['column'] ?? $field);
+
+        return $fields[$field]['type'] === 'string' ? QueryExpressions::text($column, $grammar) : $column;
     }
 
     /** @param array<string, array<array-key, mixed>> $fields */

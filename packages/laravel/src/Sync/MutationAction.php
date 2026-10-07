@@ -181,10 +181,11 @@ final class MutationAction
                     (clone $query)->whereKey($model->getKey())->update($model->getDirty());
                 }
             } else {
-                if ($action === 'update' && $values === [] && $model->usesTimestamps()) {
-                    $model->touch();
-                } else {
-                    $model->save();
+                $saved = $action === 'update' && $values === [] && $model->usesTimestamps()
+                    ? $model->touch()
+                    : $model->save();
+                if ($saved !== true) {
+                    throw new ProtocolException('validation_failed', 'Host model rejected the mutation.');
                 }
             }
             $model->refresh();
@@ -201,7 +202,12 @@ final class MutationAction
             if ($bulk) {
                 (clone $query)->whereKey($model->getKey())->increment($field, $operation['values']['delta']);
             } else {
-                $model->increment($field, $operation['values']['delta']);
+                // Eloquent returns false on an updating veto despite its int-only PHPDoc.
+                /** @var int|false $affectedRows */
+                $affectedRows = $model->increment($field, $operation['values']['delta']);
+                if ($affectedRows === false) {
+                    throw new ProtocolException('validation_failed', 'Host model rejected the mutation.');
+                }
             }
             $model->refresh();
         } elseif ($action === 'restore') {
@@ -211,22 +217,22 @@ final class MutationAction
             $updateDependencies = $this->updates->stage($model, $context, [$model->getDeletedAtColumn()]);
             if ($bulk) {
                 (clone $query)->whereKey($model->getKey())->__call('restore', []);
-            } else {
-                $model->restore();
+            } elseif ($model->restore() !== true) {
+                throw new ProtocolException('validation_failed', 'Host model rejected the mutation.');
             }
             $model->refresh();
         } elseif ($action === 'forceDelete') {
             if ($bulk) {
                 (clone $query)->whereKey($model->getKey())->forceDelete();
-            } else {
-                $model->forceDelete();
+            } elseif ($model->forceDelete() !== true) {
+                throw new ProtocolException('validation_failed', 'Host model rejected the mutation.');
             }
             $kind = 'delete';
         } elseif ($action === 'delete') {
             if ($bulk) {
                 (clone $query)->whereKey($model->getKey())->delete();
-            } else {
-                $model->delete();
+            } elseif ($model->delete() !== true) {
+                throw new ProtocolException('validation_failed', 'Host model rejected the mutation.');
             }
             if (method_exists($model, 'getDeletedAtColumn')) {
                 $model->refresh();

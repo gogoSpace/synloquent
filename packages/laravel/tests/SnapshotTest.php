@@ -101,7 +101,7 @@ final class SnapshotTest extends TestCase
         $category = collect($snapshot['records'])->firstWhere('model', 'Category');
         $restricted = $action->execute([$this->operation('restrict-category', 'delete', [], ['model' => 'Category', 'id' => '1', 'expectedRevision' => $category['revision']])], $this->actor())['receipts'][0];
         $this->assertSame('rejected', $restricted['status']);
-        $this->assertSame('23001', $restricted['error']['details']['sqlState']);
+        $this->assertSame(DB::connection()->getDriverName() === 'pgsql' ? '23001' : '23000', $restricted['error']['details']['sqlState']);
         $this->assertSame(1, Category::count());
         $location = collect($snapshot['records'])->firstWhere('model', 'Location');
         $deleted = $action->execute([$this->operation('nullify-location', 'delete', [], ['model' => 'Location', 'id' => '1', 'expectedRevision' => $location['revision']])], $this->actor())['receipts'][0];
@@ -132,7 +132,7 @@ final class SnapshotTest extends TestCase
             $attempting = json_decode(fgets($snapshotWorker['pipes'][1]), true, flags: JSON_THROW_ON_ERROR);
             $deadline = microtime(true) + 5;
             do {
-                $activity = DB::selectOne('select wait_event_type, query from pg_stat_activity where pid = ?', [$attempting['backend']]);
+                $activity = $this->lockActivity($attempting['backend']);
                 if ($activity?->wait_event_type === 'Lock') {
                     break;
                 }

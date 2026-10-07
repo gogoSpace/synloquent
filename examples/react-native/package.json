@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@op-engineering/op-sqlite": "18.2.5",
-    "@synloquent/client": "file:../../artifacts/packages/synloquent-client-0.1.0-eaa8a74731c5329a.tgz",
+    "@synloquent/client": "file:../../artifacts/packages/synloquent-client-0.1.0-bccd7e1fdf4d2444.tgz",
     "react": "19.2.8",
     "react-native": "0.87.1",
     "react-native-get-random-values": "2.0.0",

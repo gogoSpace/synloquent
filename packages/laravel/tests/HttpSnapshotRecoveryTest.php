@@ -26,7 +26,7 @@ final class HttpSnapshotRecoveryTest extends TestCase
             $reading = $this->request($snapshot, 'snapshot', ['dataset' => 'catalog']);
             $activity = null;
             $this->waitFor(function () use (&$activity): bool {
-                $activity = DB::selectOne("select wait_event_type, query from pg_stat_activity where datname = current_database() and pid <> pg_backend_pid() and wait_event_type = 'Lock' and query like '%synloquent_streams%for update%' limit 1");
+                $activity = $this->lockActivity();
 
                 return $activity !== null;
             });
@@ -81,7 +81,7 @@ final class HttpSnapshotRecoveryTest extends TestCase
                     $this->assertSame(0, DB::table($table)->count(), $stage.' left '.$table);
                 }
                 $this->assertSame([], glob($server['directory'].'/php*'));
-                $this->assertSame(0, DB::selectOne("select count(*) as total from pg_stat_activity where datname = current_database() and state = 'idle in transaction'")->total);
+                $this->assertSame(0, (int) DB::selectOne(DB::connection()->getDriverName() === 'pgsql' ? "select count(*) as total from pg_stat_activity where datname = current_database() and state = 'idle in transaction'" : "select count(*) as total from information_schema.innodb_trx join information_schema.processlist on id = trx_mysql_thread_id where db = database() and command = 'Sleep'")->total);
                 $writing = $this->request($server, 'push', ['operations' => [$this->operation('after-failure-'.$stage, 'update', ['title' => 'Lock released '.$stage], ['id' => '1', 'expectedRevision' => $revision])]]);
                 $receipt = $this->finish($writing)['payload']['receipts'][0];
                 $this->assertSame('accepted', $receipt['status']);
@@ -106,7 +106,7 @@ final class HttpSnapshotRecoveryTest extends TestCase
         fclose($socket);
         $directory = sys_get_temp_dir().'/synloquent-http-'.bin2hex(random_bytes(8));
         mkdir($directory, 0700);
-        $environment = [...getenv(), 'SYNLOQUENT_TEST_DATABASE' => DB::connection()->getDatabaseName(), 'SYNLOQUENT_TEST_ARTIFACTS' => $directory];
+        $environment = [...$this->workerEnvironment(), 'SYNLOQUENT_TEST_ARTIFACTS' => $directory];
         $process = proc_open([PHP_BINARY, '-d', 'memory_limit=128M', '-d', 'sys_temp_dir='.$directory, '-S', $address, __DIR__.'/Fixtures/http-stream-router.php'], [0 => ['pipe', 'r'], 1 => ['file', $directory.'/server.log', 'a'], 2 => ['file', $directory.'/server.log', 'a']], $pipes, dirname(__DIR__, 3), $environment);
         if ($process === false) {
             throw new \RuntimeException('Cannot start the owned HTTP fixture.');

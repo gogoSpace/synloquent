@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-$bootstrapCacheDirectory = dirname(__DIR__, 4).'/.local/test-results/test-bootstrap-cache/'.getmypid().'-'.bin2hex(random_bytes(8));
+$bootstrapCacheDirectory = dirname(__DIR__, 4).'/.agentic/artifacts/test-bootstrap-cache/'.getmypid().'-'.bin2hex(random_bytes(8));
 if (! mkdir($bootstrapCacheDirectory, 0700, true)) {
     throw new RuntimeException('Could not create isolated test bootstrap cache directory.');
 }
